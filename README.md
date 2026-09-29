@@ -86,8 +86,15 @@ and **when** it applies, so the skill can decide without guessing.
 |---|---|
 | `docs/python.md` | 3 rules + 1 shared asset |
 | `docs/go.md` | 5 rules |
-| `docs/react.md` | 1 shared asset |
+| `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 shared asset |
+| `docs/nestjs.md` | empty — awaiting research cycles |
 | `docs/dotnet.md` | empty — awaiting research cycles |
+
+A hub's rules may be framework-scoped. `docs/react.md` serves plain React and Next.js from one
+page, because a Next.js project is a React project; entries that only apply to Next.js say so
+in their *When* condition, and a React-only project skips them. `package.json` presence alone
+does not select a hub — the skill resolves by framework dependency, since Vue, Svelte, Angular,
+and NestJS all have one too.
 
 ## Adding an asset
 

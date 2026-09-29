@@ -65,24 +65,26 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
   - **Why**: Route segments render in parallel by default. A waterfall that survives a Server
     Component migration is almost always two `await`s in sequence in one body — the second
     request has not started yet when the first resolves.
-  - **When**: Target project uses the App Router and any component awaits more than one
-    independent data source.
+  - **When**: `next` is in `package.json` dependencies, the project uses `app/` (App Router),
+    and some component awaits more than one independent data source. **Not** a plain React
+    SPA — route-segment parallelism is a Next.js behaviour.
   - **Target Location**: `docs/rules/await-order-creates-the-waterfall.md`
 
 - **Path**: `rules/react/loading-js-does-not-cover-layout.md`
   - **Why**: `loading.tsx` wraps `page.js` and the segments below it, explicitly *not* the same
     segment's `layout.js`. A layout reading `cookies()` or `headers()` therefore blocks
     navigation with no fallback anywhere.
-  - **When**: Target project uses the App Router, and has a `layout.tsx` that reads runtime
-    data.
+  - **When**: `next` is in `package.json` dependencies, the project uses `app/`, and a
+    `layout.tsx` reads `cookies()`, `headers()`, or `searchParams`. Next.js only.
   - **Target Location**: `docs/rules/loading-js-does-not-cover-layout.md`
 
 - **Path**: `rules/react/nextjs-two-caching-models.md`
   - **Why**: Next.js 16 ships two caching models with disjoint opt-ins — `force-cache` in the
     one labelled *Previous Model*, `'use cache'` under `cacheComponents`. Both default to
     "not cached", so a fix written for the wrong model fails silently.
-  - **When**: Target project uses the App Router and any guidance touching `force-cache`,
-    `'use cache'`, `revalidateTag`, or `revalidatePath`.
+  - **When**: `next` is in `package.json` dependencies and the project touches `force-cache`,
+    `'use cache'`, `revalidateTag`, or `revalidatePath`. Next.js only — neither API exists in
+    React or in other frameworks.
   - **Target Location**: `docs/rules/nextjs-two-caching-models.md`
 
 ## 2. Skills (`skills/`)

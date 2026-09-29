@@ -38,14 +38,29 @@ read it:
 
 | File | Ecosystem |
 |---|---|
-| `package.json` | JS/TS — check for `next`, `react`, `pnpm-lock.yaml` |
 | `pyproject.toml`, `requirements.txt` | Python — check for `fastapi`, `django`, `pydantic` |
 | `go.mod` | Go |
 | `*.csproj`, `*.sln` | .NET/C# |
 | `composer.json` | PHP/Laravel |
+| `package.json` | JS/TS — resolve by **framework**, see below |
+
+`package.json` alone decides nothing. A Vue, Svelte, Angular, or NestJS project all have one,
+and reading the file's *existence* sends every one of them to the React hub. Read
+`dependencies` for the framework that distinguishes them:
+
+| In `dependencies` or `devDependencies` | Hub |
+|---|---|
+| `react` | `docs/react.md` — React rules, `use`/Suspense, Effect dependencies |
+| `next` | `docs/react.md` **plus** the `next`-scoped rules (see each entry's *When*) |
+| `@nestjs/core` | `docs/nestjs.md` |
+| `vue`, `svelte`, `@angular/core` | No hub yet — report the gap, inject nothing |
+
+A project can match two: `next` implies `react`, and the `next`-scoped entries declare their
+own *When*, so evaluate each manifest entry separately rather than treating the hub as a
+single verdict.
 
 Note the *present* dependencies, not every possible one. A project with `next` in
-`dependencies` gets the React hub; one without does not.
+`dependencies` gets the React hub plus the Next.js-scoped rules; one without does not.
 
 ## 3. Fetch the matching manifest
 
