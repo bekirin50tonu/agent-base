@@ -13,9 +13,9 @@ summary: "Routing hub and decision matrix for NestJS assets."
 > Match the conditions below to determine which `rules`, `skills`, `agents`, or `shared`
 > assets to inject.
 >
-> **Status**: this hub lists no NestJS-specific assets yet. Phase 1–3 have not produced a
-> NestJS asset. Fetch the manifest, find it empty, and report that rather than substituting
-> something from another ecosystem.
+> **Status**: this hub lists no NestJS-specific assets yet. Phase 2 research is in progress;
+> Phase 3 has not synthesized from it. Fetch the manifest, find it empty, and report that
+> rather than substituting something from another ecosystem.
 
 <!-- ASSET_MANIFEST_START -->
 

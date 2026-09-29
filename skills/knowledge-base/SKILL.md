@@ -42,6 +42,7 @@ read it:
 | `go.mod` | Go |
 | `*.csproj`, `*.sln` | .NET/C# |
 | `composer.json` | PHP/Laravel |
+| `pom.xml`, `build.gradle`, `build.gradle.kts` | Java — check for `spring-boot-starter-*`, see below |
 | `package.json` | JS/TS — resolve by **framework**, see below |
 
 `package.json` alone decides nothing. A Vue, Svelte, Angular, or NestJS project all have one,
@@ -55,8 +56,13 @@ and reading the file's *existence* sends every one of them to the React hub. Rea
 | `@nestjs/core` | `docs/nestjs.md` |
 | `vue`, `svelte`, `@angular/core` | No hub yet — report the gap, inject nothing |
 
-A project can match two: `next` implies `react`, and the `next`-scoped entries declare their
-own *When*, so evaluate each manifest entry separately rather than treating the hub as a
+For Java, `pom.xml` / `build.gradle` also decides nothing — plain Java, Quarkus, Micronaut, and
+Ktor all use them. Look for `spring-boot-starter-*` dependencies or the
+`org.springframework.boot` Gradle plugin. If none is present, this is plain Java, not Spring,
+and `docs/java.md` does not apply.
+
+A project can match two hubs: `next` implies `react`, and the `next`-scoped entries declare
+their own *When*. Evaluate each manifest entry separately rather than treating a hub as a
 single verdict.
 
 Note the *present* dependencies, not every possible one. A project with `next` in
