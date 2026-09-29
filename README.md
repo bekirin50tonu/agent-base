@@ -85,8 +85,9 @@ and **when** it applies, so the skill can decide without guessing.
 | Hub | Routes |
 |---|---|
 | `docs/python.md` | 3 rules + 1 shared asset |
+| `docs/go.md` | 5 rules |
 | `docs/react.md` | 1 shared asset |
-| `docs/go.md`, `docs/dotnet.md` | empty — awaiting research cycles |
+| `docs/dotnet.md` | empty — awaiting research cycles |
 
 ## Adding an asset
 
