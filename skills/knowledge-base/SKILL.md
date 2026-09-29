@@ -78,6 +78,30 @@ confirmation first — the user's own version may be there.
 Tell the user, per asset: what was injected, where, and which condition triggered it. List
 what was skipped and why. That list is how they learn the manifest has a gap.
 
+## Working in the target repo
+
+**Worktree first.** This skill writes into someone else's checkout. Before injecting anything:
+
+- Run `git status` in the target. A dirty tree means injected files mix with uncommitted
+  work, and a later `git checkout` or `git clean` can destroy both.
+- If the target has uncommitted changes, propose a worktree:
+  `git worktree add ../<name>-kb-inject -b kb-inject`. Inject there, review, then merge.
+- If the target is clean, inject directly — the worktree ceremony costs more than it buys.
+
+Injection is a branch-worthy change. Even on a clean tree, say that the result is new files
+the user has not committed, and let them decide what lands.
+
+**Verify what landed.** After each `curl`, confirm the response was a file and not a 404 page
+or an LFS pointer. `curl -f` exits non-zero on HTTP errors, so a silent bad body is otherwise
+easy to miss:
+
+```bash
+curl -fsS "$RAW/docs/react.md" | sed -n '/<!-- ASSET_MANIFEST_START -->/,/<!-- ASSET_MANIFEST_END -->/p'
+```
+
+If `curl -f` fails, the manifest does not exist for that language — report it as a gap rather
+than falling back to another ecosystem's assets.
+
 ## Constraints
 
 - **Read-only against this repo.** Never write to `rules/`, `skills/`, `agents/`, `shared/`,

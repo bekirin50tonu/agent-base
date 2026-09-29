@@ -6,10 +6,17 @@ the `knowledge-base` skill that injects the right ones into a target project.
 This repository is the **distribution source** for Phase 4 of the knowledge base
 orchestrator. What ships here is the asset library and the manifests that describe it.
 
-## How a consumer uses it
+## Install
 
-The `knowledge-base` skill reads a target repository, works out which assets apply, and
-fetches only those from this repo's `main` branch.
+The skill itself is the entry point. Fetch it into a target project's skills directory:
+
+```bash
+curl -fsS "https://raw.githubusercontent.com/bekirin50tonu/knowledge-base/main/skills/knowledge-base/SKILL.md" \
+  -o .claude/skills/knowledge-base/SKILL.md
+```
+
+Then invoke it from that project. It reads the repo, works out which assets apply, and
+fetches only those.
 
 ```bash
 # 1. the skill resolves the base URL (see skills/knowledge-base/SKILL.md §1)
