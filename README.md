@@ -8,29 +8,54 @@ orchestrator. What ships here is the asset library and the manifests that descri
 
 ## Install
 
-The skill itself is the entry point. Fetch it into a target project's skills directory:
+```bash
+npx github:bekirin50tonu/agent-base install            # ~/.claude/skills/ (all projects)
+npx github:bekirin50tonu/agent-base install --project  # .claude/skills/ (this repo only)
+```
+
+No account, no publish step, no dependency — `install` copies the bundled `SKILL.md` straight
+out of the package. Then invoke `/knowledge-base` from a project.
+
+Prefer `curl`? The skill is one file and needs nothing else:
 
 ```bash
 curl -fsS "https://raw.githubusercontent.com/bekirin50tonu/agent-base/main/skills/knowledge-base/SKILL.md" \
   -o .claude/skills/knowledge-base/SKILL.md
 ```
 
-Then invoke it from that project. It reads the repo, works out which assets apply, and
-fetches only those.
+## Applying assets
+
+The skill decides which assets apply — the `When` conditions in a manifest are prose, and only
+a reader can judge them. The CLI does the part that shell cannot: it knows which of your files
+came from this repo and which you have edited.
 
 ```bash
-# 1. the skill resolves the base URL (see skills/knowledge-base/SKILL.md §1)
-RAW="https://raw.githubusercontent.com/bekirin50tonu/agent-base/main"
-
-# 2. fetch only the manifest block from a language hub
-curl -s "$RAW/docs/react.md" | sed -n '/<!-- ASSET_MANIFEST_START -->/,/<!-- ASSET_MANIFEST_END -->/p'
-
-# 3. inject a matching asset
-curl -s "$RAW/shared/design-patterns-library.md" -o "docs/design-patterns.md"
+npx github:bekirin50tonu/agent-base apply python
 ```
 
-Run it as a Claude Code skill, or follow those steps directly — they are the whole
-integration surface.
+Prints the plan — every candidate with its `Why`, its `When`, and one of six statuses:
+
+| Status | Meaning |
+|---|---|
+| `new` | not on disk yet |
+| `up to date` | your file matches this repo |
+| `upstream changed` | your file is untouched — safe to overwrite with `--yes` |
+| `you edited this` | upstream unchanged — the CLI leaves it alone |
+| `both changed` | a merge conflict on prose; the CLI stops and writes nothing |
+| `unmanaged` | on disk with no record here; `--force` adopts it, does not merge it |
+
+Then inject what you accepted:
+
+```bash
+npx github:bekirin50tonu/agent-base apply python --asset rules/python/free-threading-detection.md
+```
+
+Each injection records a sha256 in `.agent-base/state.json`. That file is how "you edited
+this" and "upstream changed" are told apart. Do not commit it — per-machine paths merge badly.
+Recover by deleting the target file and re-running `apply`.
+
+A skill is the judgment; this is the plumbing. Both paths are supported: `agentbase apply`
+first, `curl -fsS "$RAW/<path>" -o docs/<target>` when you want no install.
 
 ## Layout
 
@@ -53,23 +78,20 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/react.md` | 1 shared asset |
 | `docs/go.md`, `docs/dotnet.md` | empty — awaiting research cycles |
 
-A manifest entry is a promise that the path exists on `main`. An entry whose file is missing
-produces a 404 for every consumer, so assets and their manifest entries are committed
-together.
-
 ## Adding an asset
 
 1. Synthesize the asset into its directory (`rules/`, `skills/`, `agents/`, `shared/`).
 2. Add the matching entry to the relevant `docs/<tech>.md` manifest, with **why** and
    **when** — the skill decides on those, not on the path.
-3. Verify the path resolves, then commit the asset and the manifest change together.
+3. Run the integrity check, then commit the asset and the manifest change together.
 
 ```bash
-for p in $(sed -n '/ASSET_MANIFEST_START/,/ASSET_MANIFEST_END/p' docs/python.md \
-           | grep -oP '(?<=\*\*Path\*\*: `)[^`]+'); do
-  [ -f "$p" ] || echo "MISS $p"
-done
+node scripts/check-manifests.mjs
 ```
+
+A manifest entry is a promise that the path exists on `main`. An entry whose file is missing
+produces a 404 for every consumer, silently, forever — that check is the one thing worth
+running every time.
 
 Assets here are produced by a separate **private** research engine. This repository is
 downstream of it: it carries the result, not the machinery.

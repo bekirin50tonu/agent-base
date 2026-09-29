@@ -28,6 +28,9 @@ sibling **private** research repo also carries this value in `.config/search.jso
 file is not part of this repo and will not exist in a fresh clone — so do not make the
 `jq` read a dependency. Never write a different slug.
 
+The `agentbase` CLI derives the same URL from its own `package.json` `repository.url`. If the
+two ever disagree, this section wins and `node scripts/check-manifests.mjs` fails.
+
 ## 2. Scan the target project
 
 Determine the ecosystem from files that already exist. Do not ask the user what they use —
@@ -64,10 +67,21 @@ unused rule file is noise the maintainer has to read and delete.
 
 ## 5. Inject
 
-Write each selected asset to its declared target location:
+Preferred path — the CLI knows which of the target's files came from this repo and which the
+user edited, and refuses to overwrite the second kind:
 
 ```bash
-curl -s "$RAW/rules/frontend/react-hooks.md" -o ".cursor/rules/react-hooks.md"
+agentbase apply python                              # plan: every candidate, with Why/When + status
+agentbase apply python --asset rules/python/free-threading-detection.md
+```
+
+Without `--asset` it only prints the plan. Judge the `When` conditions first, then pass the
+assets you accepted. `docs/**` is the only target namespace any manifest declares.
+
+Without the CLI, write each selected asset to its declared target location:
+
+```bash
+curl -fsS "$RAW/rules/python/free-threading-detection.md" -o "docs/rules/free-threading-detection.md"
 ```
 
 Create parent directories as needed. Overwriting an existing file at the target path requires
@@ -77,6 +91,10 @@ confirmation first — the user's own version may be there.
 
 Tell the user, per asset: what was injected, where, and which condition triggered it. List
 what was skipped and why. That list is how they learn the manifest has a gap.
+
+Relay the CLI's status verbatim — `up to date`, `upstream changed`, `you edited this`,
+`both changed`, `unmanaged`. A file the user edited and upstream then changed is a merge
+conflict on prose, not an update; say so rather than resolving it.
 
 ## Working in the target repo
 
