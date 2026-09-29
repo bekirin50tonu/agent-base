@@ -16,17 +16,17 @@ consumers fetch only what their project actually needs.
 
 ## 1. Resolve the base URL
 
-Asset sources are raw file URLs on this repo. The slug is fixed at the bottom of this file —
-this section is the only place it appears, so changing it here changes it everywhere.
+Asset sources are raw file URLs on this repo. **This is the single source of truth for the
+slug** — change it here and nowhere else:
 
 ```bash
-RAW="https://raw.githubusercontent.com/bekirin50tonu/knowledge-base/main"
+RAW="https://raw.githubusercontent.com/bekirin50tonu/agent-base/main"
 ```
 
-A local clone of this repo keeps the same value in `.config/search.json`; if you have that
-file, `jq -r .repo_slug .config/search.json` is the authoritative read. `.config/` is
-gitignored, so it will **not** exist in a fresh clone — the literal above is the fallback and
-is correct as written. Never invent a different slug.
+The literal is correct as written and must not be invented around. A local clone of the
+sibling **private** research repo also carries this value in `.config/search.json`, but that
+file is not part of this repo and will not exist in a fresh clone — so do not make the
+`jq` read a dependency. Never write a different slug.
 
 ## 2. Scan the target project
 

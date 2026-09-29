@@ -11,7 +11,7 @@ orchestrator. What ships here is the asset library and the manifests that descri
 The skill itself is the entry point. Fetch it into a target project's skills directory:
 
 ```bash
-curl -fsS "https://raw.githubusercontent.com/bekirin50tonu/knowledge-base/main/skills/knowledge-base/SKILL.md" \
+curl -fsS "https://raw.githubusercontent.com/bekirin50tonu/agent-base/main/skills/knowledge-base/SKILL.md" \
   -o .claude/skills/knowledge-base/SKILL.md
 ```
 
@@ -20,7 +20,7 @@ fetches only those.
 
 ```bash
 # 1. the skill resolves the base URL (see skills/knowledge-base/SKILL.md §1)
-RAW="https://raw.githubusercontent.com/bekirin50tonu/knowledge-base/main"
+RAW="https://raw.githubusercontent.com/bekirin50tonu/agent-base/main"
 
 # 2. fetch only the manifest block from a language hub
 curl -s "$RAW/docs/react.md" | sed -n '/<!-- ASSET_MANIFEST_START -->/,/<!-- ASSET_MANIFEST_END -->/p'
@@ -47,8 +47,11 @@ and **when** it applies, so the skill can decide without guessing.
 
 ## Current contents
 
-The library is early. `docs/react.md` routes to one shared pattern library; the Go, .NET, and
-Python hubs are in place but empty — they will fill as research cycles run.
+| Hub | Routes |
+|---|---|
+| `docs/python.md` | 3 rules + 1 shared asset |
+| `docs/react.md` | 1 shared asset |
+| `docs/go.md`, `docs/dotnet.md` | empty — awaiting research cycles |
 
 A manifest entry is a promise that the path exists on `main`. An entry whose file is missing
 produces a 404 for every consumer, so assets and their manifest entries are committed
@@ -57,25 +60,31 @@ together.
 ## Adding an asset
 
 1. Synthesize the asset into its directory (`rules/`, `skills/`, `agents/`, `shared/`).
-2. Register it in `.data/inventory_tree.json` via `state_manager.sh add-asset`.
-3. Add the matching entry to the relevant `docs/<tech>.md` manifest.
-4. Commit the asset and the manifest change together.
+2. Add the matching entry to the relevant `docs/<tech>.md` manifest, with **why** and
+   **when** — the skill decides on those, not on the path.
+3. Verify the path resolves, then commit the asset and the manifest change together.
 
-Steps 1–2 are performed by the orchestrator's Phase 3. This repository only carries the
-result.
+```bash
+for p in $(sed -n '/ASSET_MANIFEST_START/,/ASSET_MANIFEST_END/p' docs/python.md \
+           | grep -oP '(?<=\*\*Path\*\*: `)[^`]+'); do
+  [ -f "$p" ] || echo "MISS $p"
+done
+```
+
+Assets here are produced by a separate **private** research engine. This repository is
+downstream of it: it carries the result, not the machinery.
 
 ## Development
 
-The orchestrator that produces these assets — scouting, research, and synthesis — runs
-locally and is intentionally not part of the published repository. Its state (`.data/`),
-configuration (`.config/`), scripts (`.scripts/`), templates (`.templates/`), and reports
-(`.reports/`) are gitignored; only the synthesized output is published.
-
-See `.claude/CLAUDE.md` in a local checkout for the full protocol.
+The orchestrator that produces these assets — scouting, research, and synthesis — lives in
+its own private repository. This repo contains only the synthesized output and the manifests
+that route it. Nothing needed to *consume* these assets lives there; nothing needed to
+*produce* them lives here.
 
 ## Conventions
 
 - **Commits** follow Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`) with an
   optional scope, e.g. `feat(assets):`. No attribution trailers.
-- **Skills** follow progressive loading: `SKILL.md` plus optional `references/`, `scripts/`,
-  `templates/`, `assets/`. Size limits in `.templates/skill_structure_rule.md`.
+- **Skills** follow progressive loading: `SKILL.md` (≤500 lines) plus optional
+  `references/` (≤200 lines/file), `scripts/` (≤300), `templates/` (≤100), and `assets/`.
+  Only the `name` and `description` frontmatter is loaded at discovery.
