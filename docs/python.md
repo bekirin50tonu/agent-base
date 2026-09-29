@@ -2,7 +2,7 @@
 language: "Python"
 tag: "python"
 ecosystem: "backend"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 summary: "Routing hub and decision matrix for Python assets."
 ---
 
@@ -24,6 +24,23 @@ summary: "Routing hub and decision matrix for Python assets."
   - **When**: Target project sets `requires-python >= 3.12` or a `py312+` Ruff
     `target-version`, and the codebase declares generic classes or functions.
   - **Target Location**: `docs/rules/pep695-native-generics.md`
+
+- **Path**: `rules/python/free-threading-detection.md`
+  - **Why**: A free-threaded build can run *with the GIL back on* — via `PYTHON_GIL`, `-X
+    gil`, or an unmarked C extension re-enabling it at import. Build metadata
+    (`sys.version`, wheel tag) reports the distribution, not the running process, so the
+    parallelism silently is not there.
+  - **When**: Target project deploys on Python 3.13+ free-threaded builds (`python3.14t`),
+    or pins `Py_GIL_DISABLED`, or has any C extension in its import graph.
+  - **Target Location**: `docs/rules/free-threading-detection.md`
+
+- **Path**: `rules/python/free-threading-overhead.md`
+  - **Why**: Overhead is 1-8% single-threaded and platform-dependent, and immortalization
+    removes deterministic deallocation — which breaks `weakref.finalize`-based cleanup.
+    Adopting on the premise that "threads are fast now" is wrong on both counts.
+  - **When**: Target project is evaluating or has adopted a free-threaded build for
+    CPU-bound work, or uses `weakref.finalize` / finalizers to release external resources.
+  - **Target Location**: `docs/rules/free-threading-overhead.md`
 
 ## 2. Skills (`skills/`)
 _Empty — no Python skills have been synthesized._
