@@ -16,6 +16,16 @@ npx github:bekirin50tonu/agent-base install --project  # .claude/skills/ (this r
 No account, no publish step, no dependency — `install` copies the bundled `SKILL.md` straight
 out of the package. Then invoke `/knowledge-base` from a project.
 
+`uninstall` takes the same flag and removes what `install` wrote:
+
+```bash
+npx github:bekirin50tonu/agent-base uninstall
+```
+
+It removes the skill only. Assets you already injected under `docs/` are your files by then,
+and `.agent-base/state.json` stays put — deleting it would make every one of them look
+`unmanaged`, so the next `apply` could no longer tell an edit from an update.
+
 Prefer `curl`? The skill is one file and needs nothing else:
 
 ```bash
