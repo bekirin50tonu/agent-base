@@ -33,40 +33,24 @@ two ever disagree, this section wins and `node scripts/check-manifests.mjs` fail
 
 ## 2. Scan the target project
 
-Determine the ecosystem from files that already exist. Do not ask the user what they use —
-read it:
+Determine the ecosystem from files that already exist. Do not ask the user what they use — read it:
 
-| File | Ecosystem |
-|---|---|
-| `pyproject.toml`, `requirements.txt` | Python — check for `fastapi`, `django`, `pydantic` |
-| `go.mod` | Go |
-| `*.csproj`, `*.sln` | .NET/C# |
-| `composer.json` | PHP/Laravel |
-| `pom.xml`, `build.gradle`, `build.gradle.kts` | Java — check for `spring-boot-starter-*`, see below |
-| `package.json` | JS/TS — resolve by **framework**, see below |
+| File | Ecosystem | Trigger Conditions |
+|---|---|---|
+| `pom.xml`, `build.gradle`, `build.gradle.kts` | Java | `spring-boot-starter-*` veya `org.springframework.boot` Gradle plugin |
+| `docker-compose.yml`, `docker-compose.override.yml` | Backend Architecture | Herhangi bir Docker Compose dosyası |
+| `*.k8s.yaml`, `*.k8s.yml`, `kustomization.yaml` | Backend Architecture | Kubernetes manifest veya Kustomization dosyası |
+| `*.broker.yaml`, `*.broker.yml`, `rabbitmq.conf`, `kafka.properties` | Backend Architecture | Message broker yapılandırma dosyaları |
+| `services/` veya `apps/` dizini var | Backend Architecture | Mikroservis veya modüler monolit yapısı gösteren dizin yapısı |
+| `package.json` | MCP | `@modelcontextprotocol/sdk` veya `@modelcontextprotocol/spec` bağımlılığı |
+| `*.mcp.json` | MCP | MCP konfigürasyon dosyası |
+| `pyproject.toml`, `requirements.txt` | Python MCP | `mcp` veya `modelcontextprotocol` paketi |
+| `*.csproj`, `*.sln` | .NET MCP | `ModelContextProtocol` veya `Mcp.Sdk` paket referansı |
+| `go.mod` | Go MCP | `github.com/modelcontextprotocol/modelcontextprotocol-go` |
 
-`package.json` alone decides nothing. A Vue, Svelte, Angular, or NestJS project all have one,
-and reading the file's *existence* sends every one of them to the React hub. Read
-`dependencies` for the framework that distinguishes them:
+For each row, if the file exists and the trigger condition holds, then the ecosystem is matched.
 
-| In `dependencies` or `devDependencies` | Hub |
-|---|---|
-| `react` | `docs/react.md` — React rules, `use`/Suspense, Effect dependencies |
-| `next` | `docs/react.md` **plus** the `next`-scoped rules (see each entry's *When*) |
-| `@nestjs/core` | `docs/nestjs.md` |
-| `vue`, `svelte`, `@angular/core` | No hub yet — report the gap, inject nothing |
-
-For Java, `pom.xml` / `build.gradle` also decides nothing — plain Java, Quarkus, Micronaut, and
-Ktor all use them. Look for `spring-boot-starter-*` dependencies or the
-`org.springframework.boot` Gradle plugin. If none is present, this is plain Java, not Spring,
-and `docs/java.md` does not apply.
-
-A project can match two hubs: `next` implies `react`, and the `next`-scoped entries declare
-their own *When*. Evaluate each manifest entry separately rather than treating a hub as a
-single verdict.
-
-Note the *present* dependencies, not every possible one. A project with `next` in
-`dependencies` gets the React hub plus the Next.js-scoped rules; one without does not.
+A project can match multiple ecosystems (e.g., having both a Docker Compose file and a package.json would match both Backend Architecture and MCP).
 
 ### Cross-cutting hubs
 

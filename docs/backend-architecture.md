@@ -46,7 +46,7 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
     rather than designed away.
   - **When**: Target project writes to a database and publishes to Kafka, RabbitMQ, NATS, or a
     cloud queue, or runs a polling job that reads changed rows to trigger downstream work.
-  - **Target Location`: `docs/rules/architecture/event-publishing-has-a-dual-write-problem.md`
+  - **Target Location**: `docs/rules/architecture/event-publishing-has-a-dual-write-problem.md`
 
 - **Path**: `rules/architecture/vertical-slice-organizes-by-feature.md`
   - **Why**: A controllers/services/repositories layout makes one feature's change span four
@@ -129,13 +129,13 @@ hubs without adding routing._
 
 ## 4. Shared Assets (`shared/`)
 
-- **Path**: `shared/architecture/design-patterns-library.md`
+- **Path**: `shared/architecture/backend-design-patterns.md`
   - **Why**: The GoF catalogue, the architectural and code anti-patterns, and the per-stack
     considerations for .NET, Go, Laravel, and Python. It is a reference to consult when choosing
     a pattern, not a constraint to obey — which is why it is shared rather than a rule.
   - **When**: Target project is choosing between patterns, or a review proposes one and the
     question is whether it fits the situation.
-  - **Target Location**: `docs/architecture/design-patterns-library.md`
+  - **Target Location**: `docs/architecture/backend-design-patterns.md`
 
 <!-- ASSET_MANIFEST_END -->
 

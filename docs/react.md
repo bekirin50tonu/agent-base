@@ -145,6 +145,43 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
     API, or a `fetch` wrapper under five files.
   - **Target Location**: `docs/frontend/http-client-interceptors-and-retries.md`
 
+- **Path**: `shared/frontend/state-and-data-ownership.md`
+  - **Why**: The choice between `useState`, Context, a store, and a query cache is a question of
+    who owns the value's lifetime, not of preference. Covers the three-owner table with what each
+    one invalidates, why Context's "re-renders all consumers" makes it a lane for rarely-changing
+    data only, why a store without selectors is the same bug in quieter form, and React's own
+    position that Effects are the wrong tool for transforming data for render.
+  - **When**: Target project has `zustand`, `redux`, `jotai`, or `recoil` as a dependency, is
+    deciding where a new piece of state should live, or hand-rolls `useEffect` + `fetch` +
+    `loading` + `error` in more than one component.
+  - **Target Location**: `docs/frontend/state-and-data-ownership.md`
+
+- **Path**: `shared/frontend/hook-utility-libraries.md`
+  - **Why**: Four libraries answer "should I write this hook myself?" and three of them solve
+    browser-API plumbing only — the failure mode is reaching for one to solve state
+    architecture, which is a different question with the same name. Covers the four measured
+    against install base, release recency, and React peer range; the catalogue overlap that makes
+    adopting one a decision and adding a second a bug; `ahooks`' `useRequest` cache as the
+    designed-subset alternative to a query library; and the SSR rules that decide whether a
+    hand-rolled hook is safe at all.
+  - **When**: Target project has `ahooks`, `react-use`, `usehooks-ts`, or `@reactuses/core` as a
+    dependency, is considering adding one, or a component hand-rolls an event listener, a
+    debounce timer, or a `localStorage` read/write.
+  - **Target Location**: `docs/frontend/hook-utility-libraries.md`
+
+- **Path**: `shared/frontend/measuring-performance-against-core-web-vitals.md`
+  - **Why**: Performance work without field data is guessing. Gives the three Core Web Vitals
+    thresholds at the 75th percentile, and the decomposition that turns "slow" into an action:
+    LCP's four subparts and the trap that optimizing one shifts time into another, INP's three
+    subparts with the long-task mechanism that justifies code splitting, and the two distinct
+    font failures — delayed render (LCP) and swap-induced layout shift (CLS, fixed with
+    `size-adjust`, not faster loading). Also the lab-versus-field difference on CLS, which is why
+    a Lighthouse 0 can coexist with poor real-user CLS.
+  - **When**: Target project reports a performance problem, proposes a bundle or lazy-loading
+    change with no target metric, has a Lighthouse score as its only evidence, or ships a
+    third-party font, an on-demand modal, or a large Client Component.
+  - **Target Location**: `docs/frontend/measuring-performance-against-core-web-vitals.md`
+
 <!-- ASSET_MANIFEST_END -->
 
 ---

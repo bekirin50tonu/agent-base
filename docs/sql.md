@@ -55,6 +55,16 @@ summary: "Routing hub and decision matrix for SQL assets."
 
 ## 4. Shared Assets (`shared/`)
 
-_Empty — no SQL specific shared assets have been synthesized._
+- **Path**: `shared/backend/redis-as-a-cache.md`
+  - **Why**: A misbehaving cache does not throw — it gets slow, and the causes are three and
+    usually unexamined. Covers why `maxmemory` unset is the default failure on 64-bit Redis, the
+    `INFO` counters that distinguish a wrong eviction policy from too-low a TTL, why the
+    `volatile-*` policies silently degrade to `noeviction` when no key carries a TTL, and the two
+    misuses — `KEYS` in application code (a multi-second single-threaded stall) and TTL-only
+    invalidation versus Redis 6 client-side tracking.
+  - **When**: Target project uses Redis for read-through or cache-aside caching, has never set
+    `maxmemory` or `maxmemory-policy`, shares an instance with queues or locks, or reaches for
+    `KEYS` in application code.
+  - **Target Location**: `docs/backend/redis-as-a-cache.md`
 
 <!-- ASSET_MANIFEST_END -->
