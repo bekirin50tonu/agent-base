@@ -13,14 +13,55 @@ summary: "Routing hub and decision matrix for NestJS assets."
 > Match the conditions below to determine which `rules`, `skills`, `agents`, or `shared`
 > assets to inject.
 >
-> **Status**: this hub lists no NestJS-specific assets yet. Phase 2 research is in progress;
-> Phase 3 has not synthesized from it. Fetch the manifest, find it empty, and report that
-> rather than substituting something from another ecosystem.
+> **Status**: four rules, all from the injection-scope cluster. Phase 2 research on NestJS
+> request lifetimes is complete; other NestJS topics are not yet covered. Report the gap rather
+> than substituting something from another ecosystem.
+>
+> **Scope**: these rules are about provider lifetime in a Nest application — a Node.js
+> single-process framework. They assume the default `NestFactory.create()` HTTP server and do
+> not cover GraphQL resolvers or microservice transports except where noted.
 
 <!-- ASSET_MANIFEST_START -->
 
 ## 1. Rules (`rules/`)
-_Empty — no NestJS rules have been synthesized._
+- **Path**: `rules/nestjs/request-scope-bubbles-up-the-di-tree.md`
+  - **Why**: `Scope.REQUEST` propagates from a dependency to its dependents, so one flag on a
+    low-level provider silently re-instantiates the controller and every service above it on
+    every request. The failure is invisible in the class you edited.
+  - **When**: Target project has `@nestjs/core` and registers `@Injectable()` classes as
+    providers. Apply even if no `Scope.REQUEST` is present today — this is the rule that
+    explains a future one.
+  - **Target Location**: `docs/rules/nestjs/request-scope-bubbles-up-the-di-tree.md`
+
+- **Path**: `rules/nestjs/prefer-async-local-storage-over-request-scope.md`
+  - **Why**: The most common reason to add request scope is reading one value — user, tenant,
+    locale. `AsyncLocalStorage` provides it with every provider left a singleton. Choosing
+    between hand-rolled ALS, `nestjs-cls`, and the Observe SDK requires knowing which
+    transports each covers; a middleware-based store covers HTTP only.
+  - **When**: Target project has `@nestjs/core` **and** either reads request-derived values in a
+    shared service, or already uses `AsyncLocalStorage` / `nestjs-cls` / `@nestjs/observe`. The
+    transport-coverage table is the reason to inject this even when ALS is already in use.
+  - **Target Location**: `docs/rules/nestjs/prefer-async-local-storage-over-request-scope.md`
+
+- **Path**: `rules/nestjs/singletons-are-safe-until-you-mutate-one.md`
+  - **Why**: Node has no per-request thread, so the usual shared-mutable-state race cannot
+    happen — but request state written into a singleton still leaks, silently into the next
+    request. This is the first-principles justification for the default scope, and the reason
+    the ~5% latency rule is not the thing to worry about.
+  - **When**: Target project has `@nestjs/core` and any singleton provider holding mutable
+    instance state. That is the default posture, so it applies to essentially every Nest
+    application.
+  - **Target Location**: `docs/rules/nestjs/singletons-are-safe-until-you-mutate-one.md`
+
+- **Path**: `rules/nestjs/must-be-singleton-providers.md`
+  - **Why**: The docs mark gateways, Passport strategies, and cron controllers as structurally
+    unable to be request-scoped — a gateway encapsulates a real socket and cannot be
+    instantiated multiple times. Violating it is a runtime failure, not the bounded ~5%
+    latency the general scope rule accepts.
+  - **When**: Target project has `@nestjs/core` **and** uses `@WebSocketGateway`,
+    `PassportStrategy(...)`, or `@Cron(...)`. Skip if none is present — the rule is specific to
+    these three component kinds.
+  - **Target Location**: `docs/rules/nestjs/must-be-singleton-providers.md`
 
 ## 2. Skills (`skills/`)
 _Empty — no NestJS skills have been synthesized._
