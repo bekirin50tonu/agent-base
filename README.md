@@ -88,7 +88,7 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/go.md` | 5 rules |
 | `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 shared asset |
 | `docs/nestjs.md` | 4 rules + 1 skill |
-| `docs/java.md` | empty — research in progress |
+| `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) |
 | `docs/dotnet.md` | empty — research in progress |
 
 A hub's rules may be framework-scoped. `docs/react.md` serves plain React and Next.js from one
