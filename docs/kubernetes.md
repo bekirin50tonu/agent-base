@@ -12,9 +12,9 @@ summary: "Routing hub and decision matrix for Kubernetes assets."
 > Match the conditions below to determine which `rules`, `skills`, `agents`, or
 > `shared` assets to inject.
 
-> **Status**: 4 rules covering liveness probe cascading failures, readiness vs startup probe semantics,
-> namespace limitations, and resource requests/QoS class relationships, plus 1 shared asset on
-> resource requests and QoS classes.
+> **Status**: 6 rules covering liveness probe cascading failures, readiness vs startup probe semantics,
+> namespace limitations, resource requests/QoS class relationships, pod disruption budgets for
+> high availability, and priority classes and preemption, plus 1 shared asset on resource requests and QoS classes.
 
 > **Scope**: This hub covers Kubernetes cluster orchestration, pod lifecycle management,
 > resource allocation, and eviction policies. Since Kubernetes is used across backend,
@@ -44,6 +44,16 @@ summary: "Routing hub and decision matrix for Kubernetes assets."
   - **Why**: Resource requests and limits determine QoS class (Guaranteed/Burstable/BestEffort), which influences scheduling and eviction decisions.
   - **When**: Target project sets resource requests/limits on containers or pods and needs to understand scheduling and eviction behavior.
   - **Target Location**: `docs/rules/kubernetes/resource-requests-limits-qos-class.md`
+
+- **Path**: `rules/kubernetes/pod-disruption-budgets-ensure-high-availability.md`
+  - **Why**: Pod Disruption Budgets (PDBs) limit the number of pods of a replicated application that can be down simultaneously from voluntary disruptions, ensuring high availability during cluster operations like node drains, upgrades, and autoscaling. PDBs work with the Eviction API to gracefully evict pods while respecting availability constraints.
+  - **When**: Target project uses Kubernetes Deployments, StatefulSets, or other controllers managing replicated pods and needs to maintain availability during voluntary disruptions such as node drains or cluster autoscaling.
+  - **Target Location**: `docs/rules/kubernetes/pod-disruption-budgets-ensure-high-availability.md`
+
+- **Path**: `rules/kubernetes/priority-classes-and-preemption.md`
+  - **Why**: Priority Classes allow you to assign importance values to Pods, enabling the scheduler to preempt (evict) lower priority Pods when resources are needed for higher priority Pods. Preemption ensures critical workloads can be scheduled even under resource pressure, but misconfiguration can lead to unintended evictions or starvation.
+  - **When**: Target project uses Kubernetes and needs to ensure critical workloads are scheduled first during resource pressure, or to prevent certain workloads from being preempted.
+  - **Target Location**: `docs/rules/kubernetes/priority-classes-and-preemption.md`
 
 ## 2. Skills (`skills/`)
 

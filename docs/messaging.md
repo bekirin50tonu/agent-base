@@ -12,8 +12,9 @@ summary: "Routing hub and decision matrix for messaging assets."
 > Match the conditions below to determine which `rules`, `skills`, `agents`, or
 > `shared` assets to inject.
 
-> **Status**: 4 rules covering RabbitMQ exchange and binding topology, quorum vs classic queues,
-> delivery limit behavior, and Kafka KRaft replacing ZooKeeper, plus the existing 2 rules
+> **Status**: 8 rules covering RabbitMQ exchange and binding topology, quorum vs classic queues,
+> delivery limit behavior, Kafka KRaft replacing ZooKeeper, schema evolution safety, consumer lag monitoring,
+> dead letter queue patterns, and message ordering/exactly-once semantics, plus the existing 2 rules
 > (`at-least-once-is-the-guarantee-you-get.md` and `concurrent-workers-need-a-real-claim-strategy.md`).
 
 > **Scope**: This hub covers message broker patterns, delivery guarantees, consumer behaviors,
@@ -44,6 +45,26 @@ summary: "Routing hub and decision matrix for messaging assets."
   - **Why**: Kafka KRaft mode replaces ZooKeeper with an internal Raft-based metadata controller, simplifying deployment and removing external dependency.
   - **When**: Target project uses Kafka and needs to understand the migration path from ZooKeeper to KRaft or configure new clusters in KRaft mode.
   - **Target Location**: `docs/rules/kafka/kraft-replaces-zookeeper.md`
+
+- **Path**: `rules/messaging/schema-evolution-safety.md`
+  - **Why**: Schema evolution—changing the structure of messages over time—is inevitable in production systems, but unsafe evolution can break consumers, cause data loss, or require costly downtime. Safe schema evolution requires backward and forward compatibility strategies, versioning approaches, and contract testing.
+  - **When**: Target project uses messaging systems with structured data (JSON, Avro, Protobuf) and needs to evolve message schemas safely without breaking consumers or causing data loss.
+  - **Target Location**: `docs/rules/messaging/schema-evolution-safety.md`
+
+- **Path**: `rules/messaging/consumer-lag-monitoring.md`
+  - **Why**: Consumer lag—the difference between the current head of a stream and the position of a consumer group—is a critical metric for detecting processing delays and potential consumer failures in streaming systems. Effective lag monitoring requires understanding what lag indicates, setting appropriate alerts, and designing systems to handle lag gracefully.
+  - **When**: Target project uses streaming messaging systems (Kafka, RabbitMQ, Redis Streams) and needs to monitor consumer processing health and detect potential bottlenecks or failures.
+  - **Target Location**: `docs/rules/messaging/consumer-lag-monitoring.md`
+
+- **Path**: `rules/messaging/dead-letter-queue-patterns.md`
+  - **Why**: Dead Letter Queues (DLQs) are essential for handling messages that repeatedly fail processing, but improper implementation can lead to message loss, operational overhead, or false sense of security. Effective DLQ patterns require careful consideration of failure types, retry strategies, and monitoring approaches.
+  - **When**: Target project uses message brokers and needs to implement resilient poison message handling without losing visibility into failure patterns.
+  - **Target Location**: `docs/rules/messaging/dead-letter-queue-patterns.md`
+
+- **Path**: `rules/messaging/message-ordering-and-exactly-once-semantics.md`
+  - **Why**: Message ordering guarantees and exactly-once semantics are critical for data correctness in messaging systems, but they come with important trade-offs and limitations. Understanding what guarantees your broker actually provides—and under what conditions—is essential to avoid silent data corruption or duplication.
+  - **When**: Target project requires guaranteed message ordering or exactly-once processing semantics and needs to understand the actual guarantees provided by their messaging system.
+  - **Target Location**: `docs/rules/messaging/message-ordering-and-exactly-once-semantics.md`
 
 ## 2. Skills (`skills/`)
 
