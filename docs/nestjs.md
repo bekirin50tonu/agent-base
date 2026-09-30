@@ -64,7 +64,7 @@ summary: "Routing hub and decision matrix for NestJS assets."
   - **Target Location**: `docs/rules/nestjs/must-be-singleton-providers.md`
 
 ## 2. Skills (`skills/`)
-- **Path**: `skills/nestjs/REQUEST-SCOPE-TO-ALS-MIGRATION.md`
+- **Path**: `skills/nestjs/request-scope-to-als-migration/SKILL.md`
   - **Why**: A repeatable sequence for the most common NestJS performance defect — turning
     `Scope.REQUEST` that exists only to read a value into an `AsyncLocalStorage` store. Orders
     the work so the structural blockers (gateways, strategies, cron) are found before the
@@ -75,7 +75,7 @@ summary: "Routing hub and decision matrix for NestJS assets."
     request-scoped provider. The skill's Step 1 greps and exits early when neither is present,
     so it is safe to inject into a clean Nest project — but do not inject it "just in case" for
     a project with no request scoping.
-  - **Target Location**: `docs/skills/nestjs/REQUEST-SCOPE-TO-ALS-MIGRATION.md`
+  - **Target Location**: `docs/skills/nestjs/request-scope-to-als-migration/SKILL.md`
 
 ## 3. Agents (`agents/`)
 _Empty — no NestJS agents have been synthesized._

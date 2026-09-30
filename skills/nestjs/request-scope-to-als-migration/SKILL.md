@@ -1,6 +1,11 @@
 ---
 name: request-scope-to-als-migration
-description: "Audit a NestJS application for request-scoped providers, determine how far request scope bubbles up the DI tree, and migrate the ones that only need a value into an AsyncLocalStorage store. Use when a Nest application is slow, when Scope.REQUEST appears in the codebase, or when per-request user/tenant/locale values are needed deep in a service layer."
+description: "Migrate NestJS Scope.REQUEST providers to AsyncLocalStorage. Use when Scope.REQUEST or @Inject(REQUEST) appears in a Nest app, when it is slow, or when user/tenant/locale is read deep in a service."
+version: "1.0.0"
+tags:
+  - nestjs
+  - performance
+  - dependency-injection
 ---
 
 # Migrate NestJS Request Scope to AsyncLocalStorage
