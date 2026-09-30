@@ -1,0 +1,6 @@
+{
+  "name": "sql-helper",
+  "description": "Helps with SQL-related tasks, such as avoiding N+1 round-trips, setting timeouts, and understanding index usage.",
+  "model": "sonnet",
+  "tools": ["*"]
+}

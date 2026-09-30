@@ -1,0 +1,4 @@
+{
+  "name": "messaging-agent",
+  "description": "Helps with messaging-related tasks, such as configuring brokers, understanding delivery guarantees, and troubleshooting consumer issues."
+}

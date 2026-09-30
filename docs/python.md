@@ -13,7 +13,7 @@ summary: "Routing hub and decision matrix for Python assets."
 > `agents`, or `shared` assets to inject.
 >
 > **Status**: rules and shared tooling are covered, plus the mypy/ruff adoption workflow for
-> unannotated codebases. No `agents` yet.
+> unannotated codebases and a Python helper agent.
 
 <!-- ASSET_MANIFEST_START -->
 
@@ -76,6 +76,11 @@ summary: "Routing hub and decision matrix for Python assets."
   - **When**: Target project has a `pyproject.toml` with dependencies, or a hand-maintained
     `requirements.txt`, or CI pins a Python version that the project does not pin locally.
   - **Target Location**: `docs/tooling/uv-toolchain.md`
+
+- **Path**: `shared/git/machine-generated-files.md`
+  - **Why**: Most ecosystems commit at least one file their own toolchain rewrites. A merge conflict in those files is not a prose conflict, and the three-field diff tool you would reach for is the wrong tool. This is about telling generated files from authored ones, and knowing which regeneration command belongs to each.
+  - **When**: A merge or rebase stops with a conflict in `go.sum`, `uv.lock`, `packages.lock.json`, `gradle-wrapper.jar`, or a similar artifact.
+  - **Target Location**: `docs/git/machine-generated-files.md`
 
 <!-- ASSET_MANIFEST_END -->
 

@@ -103,10 +103,84 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
   - **Target Location**: `docs/agents/typescript/agent.json`
 
 ## 4. Shared Assets (`shared/`)
-- **Path**: `shared/design-patterns-library.md`
-  - **Why**: Design patterns, atomic design methodology, and stack-agnostic anti-patterns.
-  - **When**: Target project builds any UI component hierarchy.
-  - **Target Location**: `docs/design-patterns.md`
+- **Path**: `shared/frontend/atomic-design.md`
+  - **Why**: The five-stage model for placing UI components — atoms, molecules, organisms, templates, pages — as a decision aid for where a new component belongs and whether one already exists.
+  - **When**: Target project builds a UI component hierarchy, a design system, or a feature from reusable components.
+  - **Target Location**: `docs/frontend/atomic-design.md`
+
+- **Path**: `shared/frontend/modal-and-dialog-patterns.md`
+  - **Why**: `<dialog>` is Baseline widely available and `showModal()` hands you the top layer,
+    focus containment, and Escape handling that modal libraries used to reimplement badly — but
+    not scroll locking, focus *return*, or light-dismiss, which are exactly the three that get
+    missed. Includes the WAI-ARIA APG requirements (`aria-modal`, `aria-labelledby` to a visible
+    title, a close control inside the tab sequence), when `createPortal` is still the right tool,
+    and why `show()` is not a substitute for `showModal()`.
+  - **When**: Target project renders any overlay — a modal, a confirm dialog, a drawer, or a
+    lightbox — or a review asks whether a modal traps focus correctly.
+  - **Target Location**: `docs/frontend/modal-and-dialog-patterns.md`
+
+- **Path**: `shared/frontend/memoization-has-a-cost.md`
+  - **Why**: React documents that it throws away the `useMemo` cache in development and when a
+    component suspends during initial mount, which makes manual memoization a performance-only
+    tool — a cached value that is load-bearing for correctness means you picked the wrong hook.
+    Covers the rules-of-hooks constraints that make suppressing `exhaustive-deps` the one move
+    that hides a real bug, a table for choosing between `useState`/`useRef`/`useCallback`/
+    `useEffectEvent`, and the argument that most `useMemo` arguments are really a missing
+    server-state cache.
+  - **When**: Target project has `useMemo`, `useCallback`, or `React.memo` in its code, has
+    `react-hooks/exhaustive-deps` disabled, or is deciding whether to hand-write memoization on
+    React 19.
+  - **Target Location**: `docs/frontend/memoization-has-a-cost.md`
+
+- **Path**: `shared/frontend/http-client-interceptors-and-retries.md`
+  - **Why**: Four concerns — auth attachment, error normalisation, retry policy, and cancellation
+    — get reimplemented badly in every hand-rolled `fetch` wrapper. Covers the interceptor
+    ordering asymmetry (requests in registration order, responses reversed) that makes a rejecting
+    response interceptor swallow every handler after it, the retry rule that only
+    idempotent-or-keyed requests on 429/5xx/network errors are worth retrying, why backoff without
+    jitter synchronises clients into a storm, and the axios version pinning (1.20.0 and 0.34.0 are
+    both live, both carrying recent prototype-pollution fixes that touch interceptor-returned
+    config).
+  - **When**: Target project has `axios` as a dependency, more than one call site for the same
+    API, or a `fetch` wrapper under five files.
+  - **Target Location**: `docs/frontend/http-client-interceptors-and-retries.md`
+
+- **Path**: `shared/frontend/state-and-data-ownership.md`
+  - **Why**: The choice between `useState`, Context, a store, and a query cache is a question of
+    who owns the value's lifetime, not of preference. Covers the three-owner table with what each
+    one invalidates, why Context's "re-renders all consumers" makes it a lane for rarely-changing
+    data only, why a store without selectors is the same bug in quieter form, and React's own
+    position that Effects are the wrong tool for transforming data for render.
+  - **When**: Target project has `zustand`, `redux`, `jotai`, or `recoil` as a dependency, is
+    deciding where a new piece of state should live, or hand-rolls `useEffect` + `fetch` +
+    `loading` + `error` in more than one component.
+  - **Target Location**: `docs/frontend/state-and-data-ownership.md`
+
+- **Path**: `shared/frontend/hook-utility-libraries.md`
+  - **Why**: Four libraries answer "should I write this hook myself?" and three of them solve
+    browser-API plumbing only — the failure mode is reaching for one to solve state
+    architecture, which is a different question with the same name. Covers the four measured
+    against install base, release recency, and React peer range; the catalogue overlap that makes
+    adopting one a decision and adding a second a bug; `ahooks`' `useRequest` cache as the
+    designed-subset alternative to a query library; and the SSR rules that decide whether a
+    hand-rolled hook is safe at all.
+  - **When**: Target project has `ahooks`, `react-use`, `usehooks-ts`, or `@reactuses/core` as a
+    dependency, is considering adding one, or a component hand-rolls an event listener, a
+    debounce timer, or a `localStorage` read/write.
+  - **Target Location**: `docs/frontend/hook-utility-libraries.md`
+
+- **Path**: `shared/frontend/measuring-performance-against-core-web-vitals.md`
+  - **Why**: Performance work without field data is guessing. Gives the three Core Web Vitals
+    thresholds at the 75th percentile, and the decomposition that turns "slow" into an action:
+    LCP's four subparts and the trap that optimizing one shifts time into another, INP's three
+    subparts with the long-task mechanism that justifies code splitting, and the two distinct
+    font failures — delayed render (LCP) and swap-induced layout shift (CLS, fixed with
+    `size-adjust`, not faster loading). Also the lab-versus-field difference on CLS, which is why
+    a Lighthouse 0 can coexist with poor real-user CLS.
+  - **When**: Target project reports a performance problem, proposes a bundle or lazy-loading
+    change with no target metric, has a Lighthouse score as its only evidence, or ships a
+    third-party font, an on-demand modal, or a large Client Component.
+  - **Target Location**: `docs/frontend/measuring-performance-against-core-web-vitals.md`
 
 <!-- ASSET_MANIFEST_END -->
 

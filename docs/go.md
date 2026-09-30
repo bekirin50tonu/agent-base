@@ -77,7 +77,11 @@ summary: "Routing hub and decision matrix for Go assets."
   - **Target Location**: `docs/agents/go/agent.json`
 
 ## 4. Shared Assets (`shared/`)
-_Empty — no Go-specific shared assets have been synthesized._
+
+- **Path**: `shared/git/machine-generated-files.md`
+  - **Why**: Most ecosystems commit at least one file their own toolchain rewrites. A merge conflict in those files is not a prose conflict, and the three-field diff tool you would reach for is the wrong tool. This is about telling generated files from authored ones, and knowing which regeneration command belongs to each.
+  - **When**: A merge or rebase stops with a conflict in `go.sum`, `uv.lock`, `packages.lock.json`, `gradle-wrapper.jar`, or a similar artifact.
+  - **Target Location**: `docs/git/machine-generated-files.md`
 
 <!-- ASSET_MANIFEST_END -->
 

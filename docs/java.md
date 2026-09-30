@@ -69,7 +69,11 @@ summary: "Routing hub and decision matrix for Java / Spring Boot assets."
   - **Target Location**: `docs/rules/spring/virtual-threads-and-webflux-share-one-executor.md`
 
 ## 2. Skills (`skills/`)
-_Empty — no Java/Spring skills have been synthesized._
+
+- **Path**: `skills/java/spring-boot-migration/SKILL.md`
+  - **Why**: This skill provides a repeatable workflow for migrating Spring Boot applications between major versions, with special attention to the Jakarta EE namespace migration (javax.* → jakarta.*) and the coordination of dependency updates.
+  - **When**: Target project is a Spring Boot application (has `spring-boot-starter-*` dependencies or uses the `org.springframework.boot` Gradle plugin) and is targeting a version upgrade that involves a major version change (e.g., 2.x → 3.x, 3.x → 4.x).
+  - **Target Location**: `docs/skills/java/spring-boot-migration/SKILL.md`
 
 ## 3. Agents (`agents/`)
 
@@ -79,7 +83,11 @@ _Empty — no Java/Spring skills have been synthesized._
   - **Target Location**: `docs/agents/java/agent.json`
 
 ## 4. Shared Assets (`shared/`)
-_Empty — no Java/Spring-specific shared assets have been synthesized._
+
+- **Path**: `shared/git/machine-generated-files.md`
+  - **Why**: Most ecosystems commit at least one file their own toolchain rewrites. A merge conflict in those files is not a prose conflict, and the three-field diff tool you would reach for is the wrong tool. This is about telling generated files from authored ones, and knowing which regeneration command belongs to each.
+  - **When**: A merge or rebase stops with a conflict in `go.sum`, `uv.lock`, `packages.lock.json`, `gradle-wrapper.jar`, or a similar artifact.
+  - **Target Location**: `docs/git/machine-generated-files.md`
 
 <!-- ASSET_MANIFEST_END -->
 

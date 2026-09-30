@@ -47,7 +47,11 @@ summary: "Routing hub and decision matrix for .NET / C# assets."
   - **Target Location**: `docs/rules/dotnet/backgroundservice-over-task-run-for-hosted-work.md`
 
 ## 2. Skills (`skills/`)
-_Empty — no .NET skills have been synthesized._
+
+- **Path**: `skills/dotnet/modernize-net-framework-to-sdk/SKILL.md`
+  - **Why**: The migration tooling landscape shifted under the old guides — `try-convert` is archived and .NET Upgrade Assistant is deprecated in favour of the GitHub Copilot upgrade agent. The skill stages prepare-under-Framework, assess with the Platform Compatibility Analyzer, convert to SDK-style, then validate before modernizing — so the conversion is not mistaken for the migration.
+  - **When**: Target project still targets .NET Framework (pre-.NET 5 `TargetFrameworkVersion` csproj) and is moving to .NET 8+, or builds against Windows-only APIs during such a port.
+  - **Target Location**: `docs/skills/dotnet/modernize-net-framework-to-sdk/SKILL.md`
 
 ## 3. Agents (`agents/`)
 
@@ -57,7 +61,11 @@ _Empty — no .NET skills have been synthesized._
   - **Target Location**: `docs/agents/dotnet/agent.json`
 
 ## 4. Shared Assets (`shared/`)
-_Empty — no .NET-specific shared assets have been synthesized._
+
+- **Path**: `shared/git/machine-generated-files.md`
+  - **Why**: Most ecosystems commit at least one file their own toolchain rewrites. A merge conflict in those files is not a prose conflict, and the three-field diff tool you would reach for is the wrong tool. This is about telling generated files from authored ones, and knowing which regeneration command belongs to each.
+  - **When**: A merge or rebase stops with a conflict in `go.sum`, `uv.lock`, `packages.lock.json`, `gradle-wrapper.jar`, or a similar artifact.
+  - **Target Location**: `docs/git/machine-generated-files.md`
 
 <!-- ASSET_MANIFEST_END -->
 
