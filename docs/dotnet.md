@@ -2,7 +2,7 @@
 language: ".NET/C#"
 tag: "csharp"
 ecosystem: "backend"
-last_updated: "2026-09-29"
+last_updated: "2026-09-30"
 summary: "Routing hub and decision matrix for .NET / C# assets."
 ---
 
@@ -12,14 +12,39 @@ summary: "Routing hub and decision matrix for .NET / C# assets."
 > `*.sln`). Match the conditions below to determine which `rules`, `skills`, `agents`, or
 > `shared` assets to inject.
 >
-> **Status**: this hub lists no .NET-specific assets yet. Phase 2 research is in progress;
-> Phase 3 has not synthesized from it. Fetch the manifest, find it empty, and report that
-> rather than substituting something from another ecosystem.
+> **Status**: 5 rules covering cancellation, discarded tasks, task composition, the
+> thread-pool starvation folklore, and hosted background work. Synthesized against .NET 10 /
+> ASP.NET Core 10 documentation. The async sections (1–3) apply to any C# with `async`; rule 4
+> applies wherever the thread pool is contended; rule 5 is ASP.NET Core only.
 
 <!-- ASSET_MANIFEST_START -->
 
 ## 1. Rules (`rules/`)
-_Empty — no .NET rules have been synthesized._
+
+- **Path**: `rules/dotnet/cancellation-token-is-a-parameter-not-ambient-state.md`
+  - **Why**: A `CancellationToken` is delivered through a parameter, never ambiently. The single highest-value sentence in the docs is on `Task.Run`: *"Run(Action, CancellationToken) does not pass cancellationToken to action."* — the overload's token gates scheduling only, so a delegate that looks cancellable is not.
+  - **When**: Target project has `async` methods that accept a `CancellationToken`, or any `Task.Run` in the source.
+  - **Target Location**: `docs/rules/dotnet/cancellation-token-is-a-parameter-not-ambient-state.md`
+
+- **Path**: `rules/dotnet/fire-and-forget-hides-exceptions.md`
+  - **Why**: A faulted task holds its exception until something applies `await`. Nobody awaits a discarded task, so the failure is unobservable — and since .NET 4.5 it does not crash the process. Discarding the return value is the anti-pattern, not `Task.Run` itself.
+  - **When**: Target project discards a `Task` (fire-and-forget, `_ =`, or an un-awaited `Task.Run`), or shows CS4014 suppressions.
+  - **Target Location**: `docs/rules/dotnet/fire-and-forget-hides-exceptions.md`
+
+- **Path**: `rules/dotnet/whenall-does-not-cancel-and-linked-cts-is-or-only.md`
+  - **Why**: Aggregating work is not aggregating cancellation. `Task.WhenAll` completes but does not cancel; `CreateLinkedTokenSource` is OR-only across all four overloads with no AND variant; and `await Task.WhenAny(...)` alone surfaces no exception because you awaited the wrapper, not the inner task.
+  - **When**: Target project uses `Task.WhenAll`, `Task.WhenAny`, or `CreateLinkedTokenSource` — fan-out/fan-in code of any shape.
+  - **Target Location**: `docs/rules/dotnet/whenall-does-not-cancel-and-linked-cts-is-or-only.md`
+
+- **Path**: `rules/dotnet/setminthreads-is-not-the-starvation-fix.md`
+  - **Why**: The docs document the folklore remedy and then name five mechanisms by which it degrades performance. The first — more worker threads scheduled even when nothing is blocked — makes a *healthy* pool look starved, which is how the folklore got written. Scoped as a temporary workaround for blocking, with a caution attached.
+  - **When**: Target project calls `ThreadPool.SetMinThreads`, or shows thread-pool queue latency alongside blocking calls (`.Result`, `.Wait()`, `Task.Run` around I/O).
+  - **Target Location**: `docs/rules/dotnet/setminthreads-is-not-the-starvation-fix.md`
+
+- **Path**: `rules/dotnet/backgroundservice-over-task-run-for-hosted-work.md`
+  - **Why**: `BackgroundService` makes the host block in `StopAsync` waiting on your task — the reference a fire-and-forget lacks. Cancellation arrives as a required parameter, the 30-second `ShutdownTimeout` bounds non-cooperation, and the `Func<CancellationToken, ValueTask>` work-item signature makes non-propagation a compile error. `PeriodicTimer` replaces `System.Threading.Timer` because the tick is awaited, so iterations cannot overlap.
+  - **When**: Target project is ASP.NET Core and has work outliving a request — background jobs, polling loops, timers, queue consumers.
+  - **Target Location**: `docs/rules/dotnet/backgroundservice-over-task-run-for-hosted-work.md`
 
 ## 2. Skills (`skills/`)
 _Empty — no .NET skills have been synthesized._
