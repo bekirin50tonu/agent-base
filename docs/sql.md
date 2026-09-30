@@ -2,7 +2,7 @@
 language: "SQL"
 tag: "sql"
 ecosystem: "backend"
-last_updated: "2026-09-30"
+last_updated: "2026-10-01"
 summary: "Routing hub and decision matrix for SQL assets."
 ---
 
@@ -12,9 +12,10 @@ summary: "Routing hub and decision matrix for SQL assets."
 > Match the conditions below to determine which `rules`, `skills`, `agents`, or
 > `shared` assets to inject.
 
-> **Status**: 3 rules covering NULL semantics in `NOT IN`, the disabled-by-default
-> timeout family, and `CREATE INDEX CONCURRENTLY` transaction limits, plus an
-> EXPLAIN-first optimization workflow. Sourced against the PostgreSQL current docs.
+> **Status**: 5 rules covering NULL semantics in `NOT IN`, the disabled-by-default
+> timeout family, `CREATE INDEX CONCURRENTLY` transaction limits, READ COMMITTED
+> recheck behavior, and SERIALIZABLE retry requirement, plus an EXPLAIN-first
+> optimization workflow. Sourced against the PostgreSQL current docs.
 
 > **Scope**: This hub covers PostgreSQL databases and SQL usage patterns. Since PostgreSQL is used
 > across backend, frontend (via ORMs/dev tools), and data science projects, this
@@ -38,6 +39,16 @@ summary: "Routing hub and decision matrix for SQL assets."
   - **Why**: A regular `CREATE INDEX` can run inside a transaction block, but `CREATE INDEX CONCURRENTLY` cannot — and the failure modes compound: only one concurrent build per table, an INVALID index if interrupted, no concurrent builds on partitioned tables.
   - **When**: Target project runs PostgreSQL schema migrations under a tool that wraps DDL in transactions, and needs zero-downtime index creation.
   - **Target Location**: `docs/rules/sql/create-index-concurrently-cannot-run-in-a-transaction.md`
+
+- **Path**: `rules/sql/read-committed-rechecks-the-where-clause.md`
+  - **Why**: In READ COMMITTED, each statement sees a fresh snapshot, but UPDATE/DELETE recheck the WHERE clause against current row versions before modifying, causing concurrent changes to be skipped.
+  - **When**: Target project executes UPDATE or DELETE statements and needs to understand concurrent modification effects.
+  - **Target Location**: `docs/rules/sql/read-committed-rechecks-the-where-clause.md`
+
+- **Path**: `rules/sql/serializable-requires-retry-not-a-fallback.md`
+  - **Why**: SERIALIZABLE isolation prevents write skews via predicate locking but returns SQLSTATE 40001 on serialization failure, requiring application retry from the start.
+  - **When**: Target project requires strong isolation to prevent write skews and can handle transaction retries.
+  - **Target Location**: `docs/rules/sql/serializable-requires-retry-not-a-fallback.md`
 
 ## 2. Skills (`skills/`)
 
@@ -67,4 +78,15 @@ summary: "Routing hub and decision matrix for SQL assets."
     `KEYS` in application code.
   - **Target Location**: `docs/backend/redis-as-a-cache.md`
 
+- **Path**: `shared/backend/postgres-connection-slot-budget.md`
+  - **Why**: PostgreSQL connection slots are limited by `max_connections` and reserved connections; standby servers must match primary's limit to avoid query rejection.
+  - **When**: Target project configures PostgreSQL connection pooling, monitors connection usage, or needs to ensure superuser/maintenance access under load.
+  - **Target Location**: `docs/shared/backend/postgres-connection-slot-budget.md`
+
 <!-- ASSET_MANIFEST_END -->
+
+---
+## Adding assets here
+
+A manifest entry is a promise that the path exists on `main`. Phase 3 must `add-asset`
+and commit the file in the same push that updates this hub — otherwise consumers get a 404.

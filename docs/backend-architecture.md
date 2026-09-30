@@ -118,6 +118,26 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
     traces break in the async leg.
   - **Target Location**: `docs/rules/observability/correlation-ids-are-just-trace-ids-plus-propagated-fields.md`
 
+- **Path**: `rules/kubernetes/liveness-probe-causes-cascading-failures.md`
+  - **Why**: Liveness probe failures trigger container restarts; under load, this can shift work to surviving instances and cause cascading failures.
+  - **When**: Target project uses Kubernetes liveness probes to check container health, especially for long-running services or microservices.
+  - **Target Location**: `docs/rules/kubernetes/liveness-probe-causes-cascading-failures.md`
+
+- **Path**: `rules/kubernetes/readiness-and-startup-are-different-questions.md`
+  - **Why**: Startup probes gate liveness/readiness during init; readiness probes control traffic routing; using the wrong probe type leads to premature traffic or delayed failure detection.
+  - **When**: Target project has containers that need extra time to start (e.g., Java/Spring) or uses probes to gate traffic via Services.
+  - **Target Location**: `docs/rules/kubernetes/readiness-and-startup-are-different-questions.md`
+
+- **Path**: `rules/kubernetes/namespaces-are-not-a-tenancy-boundary.md`
+  - **Why**: Namespaces provide name scoping and policy attachment but do not isolate resources strongly enough for multi-tenancy security.
+  - **When**: Target project uses Kubernetes namespaces to separate environments, teams, or components and needs to understand isolation limits.
+  - **Target Location**: `docs/rules/kubernetes/namespaces-are-not-a-tenancy-boundary.md`
+
+- **Path**: `rules/kubernetes/resource-requests-limits-qos-class.md`
+  - **Why**: Resource requests and limits determine QoS class (Guaranteed/Burstable/BestEffort), which influences scheduling and eviction decisions.
+  - **When**: Target project sets resource requests/limits on containers or pods and needs to understand scheduling and eviction behavior.
+  - **Target Location**: `docs/rules/kubernetes/resource-requests-limits-qos-class.md`
+
 ## 2. Skills (`skills/`)
 
 _Empty — no cross-cutting backend architecture workflows synthesized yet._

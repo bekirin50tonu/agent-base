@@ -61,7 +61,7 @@ The scoping matters most with Kafka, where transactions do not cross the boundar
 
 ## Caveats on confidence
 
-- The delivery-limit defaults and the at-least-once dead-letter option are verified against the RabbitMQ quorum-queue documentation current as of 2026-09-30 (*"Starting with RabbitMQ 4.0, the delivery limit for quorum queues defaults to 20."*).
+- The delivery-limit defaults and the at-least-once dead-letter option are verified against the RabbitMQ quorum-queue documentation current as of 2026-09-30 (*"Starting with RabbitMQ 4.0, the delivery limit for quorum queues defaults to 20."*). **Note:** Starting with RabbitMQ 4.3, the delivery limit counts `delivery-count` (number of deliveries to consumers) rather than `acquired-count` (number of times taken from the queue). This means `nack` or `reject` with `requeue=false` no longer increments the limit.
 - The Redis Streams idempotent-production claim is dated to Redis 8.6 per the vendor documentation; if your server is older, that path does not exist and producer-side dedupe is entirely your code.
 - Kafka's exactly-once *cost* is asserted from the API surface (transactions + `isolation.level=read_committed` + idempotent producer), **not** from benchmark numbers. Do not quote a throughput penalty figure from this rule.
 - We did not verify the transactional-dedupe sample against a specific ORM. The SQL shape is portable; the transaction-scoping behaviour of your driver is not necessarily.

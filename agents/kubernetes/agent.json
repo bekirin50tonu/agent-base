@@ -1,0 +1,4 @@
+{
+  "name": "kubernetes-agent",
+  "description": "Helps with Kubernetes-related tasks, such as debugging pod issues, understanding resource usage, and interpreting kubectl output."
+}
