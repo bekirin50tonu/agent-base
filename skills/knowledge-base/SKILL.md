@@ -70,16 +70,19 @@ Note the *present* dependencies, not every possible one. A project with `next` i
 
 ### Cross-cutting hubs
 
-Two hubs resolve from **no dependency file at all**, so the table above will never surface
+Three hubs resolve from **no dependency file at all**, so the table above will never surface
 them. Check them explicitly, alongside whichever language hub the project matched:
 
 | Hub | Evaluate when |
 |---|---|
 | `docs/backend-architecture.md` | `docker-compose.yml` declares two or more app services, `kustomization.yaml` or a `*.k8s.yaml` manifest set exists, `services/` or `apps/` is a top-level directory, a broker config is present (`kafka.properties`, `rabbitmq.conf`, `*broker*.yml`), or `temporal` / `restate` / `dbos` appears in any manifest |
 | `docs/mcp.md` | `mcp` / `modelcontextprotocol` / `@modelcontextprotocol/sdk` appears in a manifest, or a `.mcp.json` file exists |
+| `docs/authentication.md` | `jwt` / `jose` / `paseto` / `PyJWT` / `python-jose` / `golang-jwt` / `jsonwebtoken` / `System.IdentityModel.Tokens.Jwt` appears in a manifest, a `jwks.json` or `.well-known/openid-configuration` file is in the tree, or the project has a `login` / `auth` / `session` route module |
 
-Both are language-agnostic: a project can match them together with its language hub. Judge
-each entry on its own *When*.
+All three are language-agnostic: a project can match them together with its language hub. Judge
+each entry on its own *When*. The authentication hub's two rules point in opposite directions —
+the verifier rule to a service that *checks* tokens, the storage rule to a project with a browser
+login — so a backend-only service takes one and a full-stack app takes both.
 
 ## 3. Fetch the matching manifest
 

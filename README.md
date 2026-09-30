@@ -88,12 +88,13 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/javascript.md` | 1 skill (TypeScript strict) |
 | `docs/python.md` | 3 rules + 1 skill (mypy/ruff adoption) + 1 agent + 2 shared assets |
 | `docs/go.md` | 5 rules + 1 skill (toolchain vs. language version) + 1 agent + 1 shared asset |
-| `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 skill (TS strict) + 1 agent + 1 shared asset |
+| `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 skill (TS strict) + 1 agent + 4 shared assets |
 | `docs/nestjs.md` | 4 rules + 1 skill (request-scope to ALS) + 1 agent |
 | `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) + 1 skill (Spring Boot migration) + 1 agent + 1 shared asset |
 | `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) + 1 skill (.NET Framework → SDK-style) + 1 agent + 1 shared asset |
 | `docs/sql.md` | 3 rules (`NOT IN` nulls, disabled timeouts, `CREATE INDEX CONCURRENTLY`) + 1 skill (EXPLAIN-first) + 1 agent |
-| `docs/backend-architecture.md` | 4 rules + 1 shared asset (skills/agents empty) |
+| `docs/backend-architecture.md` | 8 rules (durable execution, dual-write, vertical slice, service extraction, idempotency keys, delivery guarantees, worker claims, trace propagation) + 1 shared asset |
+| `docs/authentication.md` | 2 rules (JWT algorithm/key pinning per RFC 8725, browser token storage per RFC 10017) |
 | `docs/mcp.md` | 2 rules + 1 skill + 1 shared asset (agents empty) |
 
 A hub's rules may be framework-scoped. `docs/react.md` serves plain React and Next.js from one

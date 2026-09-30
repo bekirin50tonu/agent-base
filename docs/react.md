@@ -108,6 +108,43 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
   - **When**: Target project builds a UI component hierarchy, a design system, or a feature from reusable components.
   - **Target Location**: `docs/frontend/atomic-design.md`
 
+- **Path**: `shared/frontend/modal-and-dialog-patterns.md`
+  - **Why**: `<dialog>` is Baseline widely available and `showModal()` hands you the top layer,
+    focus containment, and Escape handling that modal libraries used to reimplement badly — but
+    not scroll locking, focus *return*, or light-dismiss, which are exactly the three that get
+    missed. Includes the WAI-ARIA APG requirements (`aria-modal`, `aria-labelledby` to a visible
+    title, a close control inside the tab sequence), when `createPortal` is still the right tool,
+    and why `show()` is not a substitute for `showModal()`.
+  - **When**: Target project renders any overlay — a modal, a confirm dialog, a drawer, or a
+    lightbox — or a review asks whether a modal traps focus correctly.
+  - **Target Location**: `docs/frontend/modal-and-dialog-patterns.md`
+
+- **Path**: `shared/frontend/memoization-has-a-cost.md`
+  - **Why**: React documents that it throws away the `useMemo` cache in development and when a
+    component suspends during initial mount, which makes manual memoization a performance-only
+    tool — a cached value that is load-bearing for correctness means you picked the wrong hook.
+    Covers the rules-of-hooks constraints that make suppressing `exhaustive-deps` the one move
+    that hides a real bug, a table for choosing between `useState`/`useRef`/`useCallback`/
+    `useEffectEvent`, and the argument that most `useMemo` arguments are really a missing
+    server-state cache.
+  - **When**: Target project has `useMemo`, `useCallback`, or `React.memo` in its code, has
+    `react-hooks/exhaustive-deps` disabled, or is deciding whether to hand-write memoization on
+    React 19.
+  - **Target Location**: `docs/frontend/memoization-has-a-cost.md`
+
+- **Path**: `shared/frontend/http-client-interceptors-and-retries.md`
+  - **Why**: Four concerns — auth attachment, error normalisation, retry policy, and cancellation
+    — get reimplemented badly in every hand-rolled `fetch` wrapper. Covers the interceptor
+    ordering asymmetry (requests in registration order, responses reversed) that makes a rejecting
+    response interceptor swallow every handler after it, the retry rule that only
+    idempotent-or-keyed requests on 429/5xx/network errors are worth retrying, why backoff without
+    jitter synchronises clients into a storm, and the axios version pinning (1.20.0 and 0.34.0 are
+    both live, both carrying recent prototype-pollution fixes that touch interceptor-returned
+    config).
+  - **When**: Target project has `axios` as a dependency, more than one call site for the same
+    API, or a `fetch` wrapper under five files.
+  - **Target Location**: `docs/frontend/http-client-interceptors-and-retries.md`
+
 <!-- ASSET_MANIFEST_END -->
 
 ---

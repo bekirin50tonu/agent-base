@@ -18,9 +18,10 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
 > (`kafka.properties`, `rabbitmq.conf`, or a `*broker*.yml`), or a `temporal`/`restate`/`dbos`
 > dependency in any manifest file.
 >
-> **Status**: four rules covering durable execution, event-publishing atomicity, vertical-slice
-> organization, and the service-extraction decision. The extraction rule is deliberately the
-> hard one: the common failure is splitting on architecture fashion rather than on a trigger.
+> **Status**: eight rules covering durable execution, event-publishing atomicity, vertical-slice
+> organization, the service-extraction decision, idempotency keys, delivery guarantees, concurrent
+> worker claims, and trace propagation. The extraction rule is deliberately the hard one: the common
+> failure is splitting on architecture fashion rather than on a trigger.
 
 <!-- ASSET_MANIFEST_START -->
 
@@ -68,6 +69,49 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
   - **When**: Target project proposes extracting a module into a network service, or is
     adopting a microservice pattern for structure rather than for a trigger.
   - **Target Location**: `docs/rules/architecture/extract-a-service-only-for-a-named-trigger.md`
+
+- **Path**: `rules/idempotency/idempotency-keys-are-client-generated-and-scoped.md`
+  - **Why**: A retry is not rare — a client whose `POST` response was lost must choose between a
+    duplicate write and a lost one. The key has to exist before the request leaves the client
+    (a server-minted key is lost with the response) and the lookup has to be scoped to something
+    the client cannot supply alone (an unscoped key is a cross-tenant read primitive). Also covers
+    the trap people fall into: the TTL window is *effectively*-once, not exactly-once, so a retry
+    25 hours later is a second write. Notes that `Idempotency-Key` is a de-facto convention, not
+    an RFC — the IETF draft expired in 2026.
+  - **When**: Target project exposes POST or PATCH that clients are expected to retry — payment,
+    billing, order creation, webhook receivers, or any endpoint whose callers have a retry loop.
+  - **Target Location**: `docs/rules/idempotency/idempotency-keys-are-client-generated-and-scoped.md`
+
+- **Path**: `rules/messaging/at-least-once-is-the-guarantee-you-get.md`
+  - **Why**: Every crash-surviving broker redelivers sometimes, and "exactly-once" names a
+    boundary rather than the journey to your database. Pairs the acknowledgement-ordering decision
+    (ack-after-commit, because a duplicate is recoverable and a loss is not) with the dedupe
+    pattern that makes a duplicate a no-op, and names the list-pop trap that loses work outright.
+  - **When**: Target project consumes from a queue, stream, or broker and mutates state — a
+    `kafka` consumer, a `bullmq`/`sidekiq` worker, a Redis `BRPOP` loop, or a `FOR UPDATE` job
+    table poller.
+  - **Target Location**: `docs/rules/messaging/at-least-once-is-the-guarantee-you-get.md`
+
+- **Path**: `rules/messaging/concurrent-workers-need-a-real-claim-strategy.md`
+  - **Why**: A SELECT-then-UPDATE job claim is correct on the happy path and corrupted under
+    concurrency, and the corruption is intermittent enough to ship. The rule gives the three real
+    options — `FOR UPDATE SKIP LOCKED`, idempotency-key-first workers, and honestly-scoped
+    exactly-once emulation — and the failure mode for each. Applies to the SQL-job-table case as
+    often as the broker case.
+  - **When**: Target project has two or more workers or replicas claiming from the same source —
+    a job table, a queue, or a shared work list.
+  - **Target Location**: `docs/rules/messaging/concurrent-workers-need-a-real-claim-strategy.md`
+
+- **Path**: `rules/observability/correlation-ids-are-just-trace-ids-plus-propagated-fields.md`
+  - **Why**: A bespoke `X-Correlation-Id` solves logging and then costs you a propagation hop in
+    every framework between ingress and datastore — miss one and the trail breaks silently. W3C
+    Trace Context is the standard carrier and the tooling already in the stack ingests it. The
+    rule also separates the two fields people conflate: `tracestate` is a size-boxed,
+    vendor-state container, while business identifiers belong in W3C `Baggage`.
+  - **When**: Target project fans a request across processes, queues, or databases and needs to
+    join logs across those hops — or has hand-rolled a correlation header and is wondering why
+    traces break in the async leg.
+  - **Target Location**: `docs/rules/observability/correlation-ids-are-just-trace-ids-plus-propagated-fields.md`
 
 ## 2. Skills (`skills/`)
 
