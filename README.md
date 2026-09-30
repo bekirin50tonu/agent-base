@@ -87,7 +87,7 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/python.md` | 3 rules + 1 shared asset |
 | `docs/go.md` | 5 rules |
 | `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 shared asset |
-| `docs/nestjs.md` | empty — research in progress |
+| `docs/nestjs.md` | 4 rules + 1 skill |
 | `docs/java.md` | empty — research in progress |
 | `docs/dotnet.md` | empty — research in progress |
 
