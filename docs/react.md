@@ -106,7 +106,7 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
 - **Path**: `shared/design-patterns-library.md`
   - **Why**: Design patterns, atomic design methodology, and stack-agnostic anti-patterns.
   - **When**: Target project builds any UI component hierarchy.
-  - **Target Location**: `docs/design-patterns.md`
+  - **Target Location**: `docs/design-patterns-library.md`
 
 <!-- ASSET_MANIFEST_END -->
 

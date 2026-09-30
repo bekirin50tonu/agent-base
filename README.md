@@ -84,12 +84,15 @@ and **when** it applies, so the skill can decide without guessing.
 
 | Hub | Routes |
 |---|---|
-| `docs/python.md` | 3 rules + 1 skill (mypy/ruff adoption) + 1 agent + 1 shared asset |
-| `docs/go.md` | 5 rules + 1 skill (toolchain vs. language version) + 1 agent |
+| `docs/html-css.md` | _empty hub — reserved_ |
+| `docs/javascript.md` | 1 skill (TypeScript strict) |
+| `docs/python.md` | 3 rules + 1 skill (mypy/ruff adoption) + 1 agent + 2 shared assets |
+| `docs/go.md` | 5 rules + 1 skill (toolchain vs. language version) + 1 agent + 1 shared asset |
 | `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 skill (TS strict) + 1 agent + 1 shared asset |
 | `docs/nestjs.md` | 4 rules + 1 skill (request-scope to ALS) + 1 agent |
-| `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) + 1 agent |
-| `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) + 1 agent |
+| `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) + 1 skill (Spring Boot migration) + 1 agent + 1 shared asset |
+| `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) + 1 skill (.NET Framework → SDK-style) + 1 agent + 1 shared asset |
+| `docs/sql.md` | 3 rules (`NOT IN` nulls, disabled timeouts, `CREATE INDEX CONCURRENTLY`) + 1 skill (EXPLAIN-first) + 1 agent |
 
 A hub's rules may be framework-scoped. `docs/react.md` serves plain React and Next.js from one
 page, because a Next.js project is a React project; entries that only apply to Next.js say so

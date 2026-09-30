@@ -85,7 +85,7 @@ summary: "Routing hub and decision matrix for NestJS assets."
   - **Target Location**: `docs/agents/nestjs/agent.json`
 
 ## 4. Shared Assets (`shared/`)
-_Empty — no NestJS-specific shared assets have been synthesized._
+_Empty — no NestJS specific shared assets have been synthesized._
 
 <!-- ASSET_MANIFEST_END -->
 
