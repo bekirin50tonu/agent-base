@@ -72,7 +72,11 @@ summary: "Routing hub and decision matrix for Java / Spring Boot assets."
 _Empty — no Java/Spring skills have been synthesized._
 
 ## 3. Agents (`agents/`)
-_Empty — no Java/Spring agents have been synthesized._
+
+- **Path**: `agents/java/agent.json`
+  - **Why**: Helps with Java-related tasks, such as Spring Boot migration, virtual threads, and other Java best practices.
+  - **When**: Target project has a Spring Boot dependency (`spring-boot-starter-*` or `spring-boot-dependencies`) or uses the `org.springframework.boot` plugin in Gradle.
+  - **Target Location**: `docs/agents/java/agent.json`
 
 ## 4. Shared Assets (`shared/`)
 _Empty — no Java/Spring-specific shared assets have been synthesized._

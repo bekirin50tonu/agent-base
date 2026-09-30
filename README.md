@@ -88,8 +88,8 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/go.md` | 5 rules + 1 skill (toolchain vs. language version) + 1 agent |
 | `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 skill (TS strict) + 1 agent + 1 shared asset |
 | `docs/nestjs.md` | 4 rules + 1 skill (request-scope to ALS) + 1 agent |
-| `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) |
-| `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) |
+| `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) + 1 agent |
+| `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) + 1 agent |
 
 A hub's rules may be framework-scoped. `docs/react.md` serves plain React and Next.js from one
 page, because a Next.js project is a React project; entries that only apply to Next.js say so

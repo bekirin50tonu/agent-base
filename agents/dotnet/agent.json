@@ -1,0 +1,6 @@
+{
+  "name": "dotnet-helper",
+  "description": "Helps with .NET/C#-related tasks, such as migration, cancellation patterns, and other .NET best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}

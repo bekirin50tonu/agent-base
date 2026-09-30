@@ -50,7 +50,11 @@ summary: "Routing hub and decision matrix for .NET / C# assets."
 _Empty — no .NET skills have been synthesized._
 
 ## 3. Agents (`agents/`)
-_Empty — no .NET agents have been synthesized._
+
+- **Path**: `agents/dotnet/agent.json`
+  - **Why**: Helps with .NET/C#-related tasks, such as migration, cancellation patterns, and other .NET best practices.
+  - **When**: Target project has a `.csproj` or `.sln` file.
+  - **Target Location**: `docs/agents/dotnet/agent.json`
 
 ## 4. Shared Assets (`shared/`)
 _Empty — no .NET-specific shared assets have been synthesized._

@@ -1,0 +1,6 @@
+{
+  "name": "java-helper",
+  "description": "Helps with Java-related tasks, such as Spring Boot migration, virtual threads, and other Java best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
