@@ -93,6 +93,8 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) + 1 skill (Spring Boot migration) + 1 agent + 1 shared asset |
 | `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) + 1 skill (.NET Framework → SDK-style) + 1 agent + 1 shared asset |
 | `docs/sql.md` | 3 rules (`NOT IN` nulls, disabled timeouts, `CREATE INDEX CONCURRENTLY`) + 1 skill (EXPLAIN-first) + 1 agent |
+| `docs/backend-architecture.md` | 4 rules + 1 shared asset (skills/agents empty) |
+| `docs/mcp.md` | 2 rules + 1 skill + 1 shared asset (agents empty) |
 
 A hub's rules may be framework-scoped. `docs/react.md` serves plain React and Next.js from one
 page, because a Next.js project is a React project; entries that only apply to Next.js say so

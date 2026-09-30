@@ -68,6 +68,19 @@ single verdict.
 Note the *present* dependencies, not every possible one. A project with `next` in
 `dependencies` gets the React hub plus the Next.js-scoped rules; one without does not.
 
+### Cross-cutting hubs
+
+Two hubs resolve from **no dependency file at all**, so the table above will never surface
+them. Check them explicitly, alongside whichever language hub the project matched:
+
+| Hub | Evaluate when |
+|---|---|
+| `docs/backend-architecture.md` | `docker-compose.yml` declares two or more app services, `kustomization.yaml` or a `*.k8s.yaml` manifest set exists, `services/` or `apps/` is a top-level directory, a broker config is present (`kafka.properties`, `rabbitmq.conf`, `*broker*.yml`), or `temporal` / `restate` / `dbos` appears in any manifest |
+| `docs/mcp.md` | `mcp` / `modelcontextprotocol` / `@modelcontextprotocol/sdk` appears in a manifest, or a `.mcp.json` file exists |
+
+Both are language-agnostic: a project can match them together with its language hub. Judge
+each entry on its own *When*.
+
 ## 3. Fetch the matching manifest
 
 ```bash

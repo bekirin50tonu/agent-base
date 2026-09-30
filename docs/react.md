@@ -103,10 +103,10 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
   - **Target Location**: `docs/agents/typescript/agent.json`
 
 ## 4. Shared Assets (`shared/`)
-- **Path**: `shared/design-patterns-library.md`
-  - **Why**: Design patterns, atomic design methodology, and stack-agnostic anti-patterns.
-  - **When**: Target project builds any UI component hierarchy.
-  - **Target Location**: `docs/design-patterns-library.md`
+- **Path**: `shared/frontend/atomic-design.md`
+  - **Why**: The five-stage model for placing UI components — atoms, molecules, organisms, templates, pages — as a decision aid for where a new component belongs and whether one already exists.
+  - **When**: Target project builds a UI component hierarchy, a design system, or a feature from reusable components.
+  - **Target Location**: `docs/frontend/atomic-design.md`
 
 <!-- ASSET_MANIFEST_END -->
 
