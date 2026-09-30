@@ -70,7 +70,11 @@ summary: "Routing hub and decision matrix for Go assets."
   - **Target Location**: `docs/skills/go/upgrade-toolchain-and-language-version/SKILL.md`
 
 ## 3. Agents (`agents/`)
-_Empty — no Go agents have been synthesized._
+
+- **Path**: `agents/go/agent.json`
+  - **Why**: Helps with Go-related tasks, such as upgrading toolchain and language version, and applying Go best practices.
+  - **When**: Target project is a Go project (has `go.mod`).
+  - **Target Location**: `docs/agents/go/agent.json`
 
 ## 4. Shared Assets (`shared/`)
 _Empty — no Go-specific shared assets have been synthesized._

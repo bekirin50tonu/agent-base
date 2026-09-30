@@ -1,0 +1,6 @@
+{
+  "name": "python-helper",
+  "description": "Helps with Python-related tasks, such as adopting mypy, ruff, and other Python best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}

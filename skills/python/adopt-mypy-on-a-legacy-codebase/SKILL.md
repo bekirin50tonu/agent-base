@@ -1,324 +1,262 @@
 ---
 name: adopt-mypy-on-a-legacy-codebase
-description: "Add mypy and ruff to a large unannotated Python codebase. Use when a legacy service needs types, when a type gate lands in CI, or when the checked-module set needs to grow without a big-bang flip."
+description: "Adopt mypy on a large unannotated Python codebase. Use when adding mypy or a CI type gate to legacy code, or when a green run is not evidence the checked surface is what it appears."
 version: "1.0.0"
 tags:
   - python
-  - migration
   - typing
-  - tooling
+  - migration
 ---
 
-# Adopt mypy on a Legacy Codebase: Build the Gate First, Accumulate Types Behind It
+# Adopt mypy on a Legacy Codebase — the Config File Is the Work Queue
 
-The documented order is counter-intuitive and it is the thing teams most often get wrong: **you
-get the checker running before you write a single annotation.** Phase 1 is not "add types" — it
-is "make mypy pass on 5,000–50,000 lines of currently unannotated code."
+The intuitive order — annotate, then check — is the one mypy's own guide warns against. The
+documented order runs the checker *before* any annotation exists, and drives the rest of the
+migration through a config file whose shrinking entry count is the progress metric.
 
-## Step 0 — Know what the guarantee does not promise
+Everything below rests on a fact that is easy to skip and load-bearing: Python's gradual
+typing is a guideline, not a contract.
 
-Do this before planning anything, because it is what makes the rest of the workflow necessary.
+## Why
 
-The typing specification names the property your migration depends on and then declines to
-enforce it:
+The typing specification names the property that makes incremental adoption possible, then
+explicitly declines to require it:
 
-> Any allows gradually adding static types to a dynamically typed program. […] Removing type
-> annotations (making the program more dynamic) should not result in additional static type
-> errors. This is often referred to as the gradual guarantee.
+> Adding type annotations to the program (making the program more statically typed) may result
+> in static type errors […] Removing type annotations (making the program more dynamic) should
+> not result in additional static type errors. This is often referred to as the gradual
+> guarantee.
 >
 > In Python's type system, **we don't take the gradual guarantee as a strict requirement, but
 > it's a useful guideline.**
 > — https://typing.python.org/en/latest/spec/concepts.html
 
-Read the bold part as the design constraint. If the guarantee were strict, the workflow would be
-mechanical: annotate, fix errors, done. Because it is a guideline, the workflow needs escape
-hatches — `ignore_errors`, `# type: ignore`, `follow_imports=skip`, `--disable-error-code` — and
-**every escape hatch is a place where the guarantee silently stops holding.** The failure modes
-in steps 3 and 4 are not mypy bugs; they are the predictable consequence of a guideline.
+That disclaimer is the entire failure surface of this migration. It justifies the ordering
+(unannotated code cannot newly fail, so checking can precede annotating), but it promises
+nothing about *coverage* — and every escape hatch this workflow uses (`ignore_errors`,
+`# type: ignore`, `follow_imports`) is a place the guarantee silently stops holding.
 
-## Step 1 — Phase 0: lint before types (one afternoon)
+The ordering, from mypy's own guide for existing codebases:
 
-There is a cheaper gate than mypy and it comes first. ruff is a linter, not a type checker —
-its categories are correctness, suspicious, complexity, performance, style, all local or
-syntactic judgements with no cross-module type reasoning. It can check whether an annotation
-*exists* (`ANN`), but that is a presence check, not a type check.
+> If your codebase is large, pick a subset of your codebase (say, 5,000 to 50,000 lines) and
+> get mypy to run successfully only on this subset at first, **before adding annotations.**
+> This should be doable in a day or two.
+> — https://mypy.readthedocs.io/en/stable/existing_code.html
+
+Note what that insists on: phase 1 is a green run over a *slice of unannotated code*. That is
+only possible because unchecked functions are `Any`-typed and `Any` is consistent with
+everything.
+
+## Step 0 — Lint first, because it is cheaper and it is not typing
+
+Run ruff with a minimal rule set before touching mypy:
 
 ```toml
-# pyproject.toml
-[tool.ruff]
-select = ["E", "F"]     # start with two prefixes; add a group at a time
+[tool.ruff.lint]
+select = ["E", "F"]   # add a group at a time, e.g. "B" next
 ```
 
-> Start with a small set of rules (select = ["E", "F"]) and add a group at-a-time. For example,
-> you might consider expanding to select = ["E", "F", "B"] to enable the popular flake8-bugbear
-> extension.
-> — https://docs.astral.sh/ruff/linter/
+ruff's rule categories — correctness, suspicious, complexity, performance, style — are all
+*local* judgements. None of them do cross-module type inference, so this gate does not
+duplicate the type checker; it produces the first green CI run with real teeth, in an
+afternoon. Two caveats from the docs: the category taxonomy is preview-only while linter
+groups are on a deprecation path, so expect selector churn; and ruff documents no
+`ignore_errors` analogue — if the initial lint run on a legacy corpus is too large, there is
+no documented gradual ramp.
 
-> Correctness: These rules flag code that is outright wrong as written. If you encounter a
-> correctness issue, you should try to fix it rather than suppressing the error with noqa or
-> ruff: ignore.
-> — https://docs.astral.sh/ruff/linter/
+## Step 1 — Get a green run on a slice, before annotating anything
 
-Unlike mypy, ruff documents **no gradual-adoption escape hatch for a large legacy corpus** — no
-`ignore_errors` analogue. If the first run is too large, the pragmatic move is a narrow `select`
-plus a narrow path in CI, not a codebase-wide run.
+```bash
+# Pick 5,000–50,000 lines that includes real import edges — a slice with no
+# interesting imports produces a green run that tells you nothing.
+mypy <subset>
+```
 
-## Step 2 — Get a green run on a slice, before annotating
+Errors at this stage get silenced with `# type: ignore`, not fixed. Fixing comes later; the
+point of phase 1 is establishing that the tool *runs* and that the command is reproducible.
+Teams that skip to annotating inherit a 4,000-error wall and lose the ability to tell new
+breakage from old.
 
-> If your codebase is large, pick a subset of your codebase (say, 5,000 to 50,000 lines) and get
-> mypy to run successfully only on this subset at first, before adding annotations. This should
-> be doable in a day or two. The sooner you get some form of mypy passing on your codebase, the
-> sooner you benefit.
->
-> You'll likely need to fix some mypy errors, either by inserting annotations requested by mypy
-> or by adding # type: ignore comments to silence errors you don't want to fix now.
+**Exit criterion:** `mypy <subset>` exits 0, with a checked-in invocation.
+
+## Step 2 — Lock the invocation in CI, pin the version
+
+> Make sure all developers on your codebase run mypy the same way. […] Make sure everyone runs
+> mypy with the same version of mypy, for instance by pinning mypy with the rest of your dev
+> requirements.
 > — https://mypy.readthedocs.io/en/stable/existing_code.html
 
-The exit criterion is **not** zero errors on the whole repo. It is: `mypy <subset>` exits 0,
-with whatever annotations already exist.
+mypy is at 2.3.1; the adoption guide's sample CI script still pins `mypy==1.8`. Do not copy
+that pin literally — the workflow is stable across that jump, the example is not.
 
-Two things the guide does not say and you must decide:
+**Exit criterion:** the invocation runs in CI and the version is pinned.
 
-- **How to choose the subset.** The range is not a recipe. Pick a slice large enough to contain
-  real import edges — a slice with no interesting imports gives a green run that tells you
-  nothing.
-- **Errors here are silenced, not fixed.** That is the documented intent. Fixing is step 4. The
-  point of phase 1 is only that the tool runs and the command is reproducible.
+## Step 3 — Invert the config: `ignore_errors = True` globally, `False` per finished module
 
-## Step 3 — Lock the invocation, and invert the config
-
-> Make sure all developers on your codebase run mypy the same way. […] Make sure everyone type
-> checks the same set of files. […] Make sure everyone runs mypy with the same version of mypy,
-> for instance by pinning mypy with the rest of your dev requirements.
-> — https://mypy.readthedocs.io/en/stable/existing_code.html
+The mechanism that makes the migration *terminable*. Rather than opting modules in to
+checking, the default state becomes "not checked" and each finished module opts back out:
 
 ```ini
-# mypy.ini — global section
 [mypy]
 ignore_errors = True
-warn_unused_ignores = True
-mypy_path = .
 
-# one section per module you have finished, and nothing else
-[mypy-myapp.api.handlers]
+[mypy-finished_module]
 ignore_errors = False
-disallow_untyped_defs = True
+disallow_untyped_defs = True   # stops the queue from growing back
 ```
 
-The inversion is the mechanism that makes a large migration *terminable*. Most migration tooling
-is opt-in — you list what should be checked, and every omission is invisible and silently
-unchecked forever. Here the default is unchecked and each removal is progress:
+mypy documents the inversion directly:
 
-> You could even invert this, by setting ignore_errors = True in your global config section and
-> only enabling error reporting with ignore_errors = False for the set of modules you are ready to
-> type check.
+> You could even invert this, by setting ignore_errors = True in your global config section
+> and only enabling error reporting with ignore_errors = False for the set of modules you are
+> ready to type check.
 > — https://mypy.readthedocs.io/en/stable/existing_code.html
 
-**Your config file is a work queue.** The count of `[mypy-*]` sections is the progress metric, and
-CI stays green throughout because the queue absorbs everything unchecked.
+This inverts the meaning of the config file: it is no longer a description of what is checked
+but of what is *not yet* checked. Every entry removed is progress, CI stays green throughout,
+and the finish line is explicit and greppable. With opt-*in* configuration, omissions are
+invisible and silently unchecked forever.
 
-The direct cost is real: a new module is unchecked by default and nobody notices. `disallow_untyped_defs`
-on each completed module is the mitigation — it raises the floor locally instead of relying on
-remembering to opt in. An inversion without it has traded a visible problem for an invisible one.
+**Progress metric: the count of `ignore_errors = False` lines, rising. The count of remaining
+suppressed modules, falling.** Both are one grep.
 
-Do not use the global inversion on day one. mypy documents both directions without ranking them;
-the opt-out form is the phase-1 form, and the inversion is the move that starts paying once you
-have finished modules worth listing.
+## Step 4 — Track two numbers, because `Any` launders at the trust boundary
 
-## Step 4 — Track two numbers, not one
+The failure mode that makes a green build dishonest:
 
-This is the failure mode that produces a green build checking less than its output implies.
-
-When mypy cannot follow an import it does not error-and-stop. It assigns the module `Any` and
-proceeds:
-
-> If you get any of these errors on an import, mypy will assume the type of that module is Any,
-> the dynamic type. This means attempting to access any attribute of the module will
-> automatically succeed […] This can result in mypy failing to warn you about errors in your
+> If you get any of these errors on an import, mypy will assume the type of that module is
+> Any, the dynamic type. This means attempting to access any attribute of the module will
+> automatically succeed: […] This can result in mypy failing to warn you about errors in your
 > code.
 > — https://mypy.readthedocs.io/en/stable/running_mypy.html
 
-Every attribute access succeeds, every call returns `Any`, every assignment is consistent. The
-guarantee does not degrade at that boundary — it stops. And because step 3 suppresses errors
-rather than raising them, you get a passing CI run over a smaller surface than it implies.
+An unfollowed import — an internal `utils` module with no annotations, a third-party library
+with no stubs — becomes a hole whose width is the total attribute surface of that module.
+Combined with step 3's suppression, you get a green CI run that is checking less than its
+output implies.
 
-```bash
-# 1. modules you have opted in — the number teams report
-grep -c '^\[mypy-' mypy.ini
+So track **modules checked** *and* **modules reachable-but-unchecked**. A team tracking only
+the first will believe it is further along than it is.
 
-# 2. modules reachable but opted out — the number teams do not report.
-#    With the inversion this is "everything else", so count the whole surface:
-find myapp -name '*.py' | wc -l
+For suppression, prefer per-module config over `# type: ignore` — mypy's own guidance, for
+anything imported in more than a couple of places, because per-module config is *visible* and
+a scattered comment is not:
 
-# 3. suppressed, not fixed
-grep -rn '# type: ignore' --include=*.py . | wc -l
+```ini
+[mypy-untyped_dependency.*]
+ignore_missing_imports = True
 ```
 
-**Every `Any` you introduce is an undocumented exemption from the gate.** Prefer per-module
-config for anything imported in more than a couple of places, because config is *visible* and
-`# type: ignore` is not:
+## Step 5 — Know the three places the checker stops
 
-> If you only import that module in one or two places, you can use # type: ignore comments. […]
-> But if you import the module in many places, this becomes unwieldy. In this case, we recommend
-> using a configuration file.
-> — https://mypy.readthedocs.io/en/stable/existing_code.html
+**Import fan-out.** Passing a few files to mypy still processes the whole transitive import
+graph. `follow_imports` prunes it — and it has a documented trap:
 
-Also: the consistency relation governing `Any` is **not transitive**, which is the formal reason
-a hole in the middle of a container type passes unnoticed:
-
-> The consistency relation is not transitive. tuple[int, int] is consistent with tuple[Any, int],
-> and tuple[Any, int] is consistent with tuple[str, int], but tuple[int, int] is not consistent
-> with tuple[str, int].
-> — https://typing.python.org/en/latest/spec/concepts.html
-
-## Step 5 — Make it self-funding, and prune what you cannot check
-
-Two documented policies turn this from a project into a habit. Both come from the same page.
-
-> Developers should add annotations for any new code.
->
-> It's also encouraged to write annotations when you modify existing code.
-> — https://mypy.readthedocs.io/en/stable/existing_code.html
-
-> Most projects have some widely imported modules, such as utilities or model classes. It's a good
-> idea to annotate these pretty early on, since this allows code using these modules to be type
-> checked more effectively.
-> — https://mypy.readthedocs.io/en/stable/existing_code.html
-
-Widely-imported modules first — they are where one annotation buys checks across the whole
-codebase. That is the ordering that makes the migration self-funding rather than dependent on a
-dedicated sprint.
-
-For modules that cannot be checked yet, `follow_imports` is the pruning tool, and the direction
-of the pattern is a genuine trap:
-
-> Using this option in a per-module section (potentially with a wildcard […] ) is a good way to
-> prevent mypy from checking portions of your code.
->
-> **If this option is used in a per-module section, the module name should match the name of the
-> imported module, not the module containing the import statement.**
+> If this option is used in a per-module section, the module name should match the name of the
+> imported module, **not the module containing the import statement.**
 > — https://mypy.readthedocs.io/en/stable/config_file.html
 
-mypy's own verdict on this knob is blunt — treat it as a last resort:
+Easy to get backwards; check the direction when pruning.
 
-> It's very easy to silently shoot yourself in the foot when playing around with these, so this
-> should be a last resort.
-> — https://mypy.readthedocs.io/en/stable/existing_code.html
+**Non-transitive consistency.** The relation governing `Any`-containing types is not a partial
+order:
 
-## Step 6 — Reach `--strict` by subtraction, not addition
+> tuple[int, int] is consistent with tuple[Any, int], and tuple[Any, int] is consistent with
+> tuple[str, int], but tuple[int, int] is not consistent with tuple[str, int].
+> — https://typing.python.org/en/latest/spec/concepts.html
 
-`--strict` is the goal but it is not reached by turning flags on one at a time:
+An `Any` in the middle of a container type can let an inconsistency through. Locally
+explicable errors, globally surprising ones — this is the formal reason `Any`-containing types
+need review even when everything "type checks".
+
+**The `--strict` cliff.** mypy marks several strictness flags as "tricky to get passing if you
+use a lot of untyped libraries" — `disallow_subclassing_any`, `warn_return_any`,
+`extra_checks` — i.e. they fail in proportion to how untyped your dependencies are. mypy's own
+answer is subtraction, not addition:
 
 > Note that you can also start with --strict and subtract, for instance:
-> ```
-> strict = True
-> warn_return_any = False
-> ```
+> `strict = True` / `warn_return_any = False`
 > — https://mypy.readthedocs.io/en/stable/existing_code.html
 
-The subtraction order is not a guess — mypy annotates each flag's difficulty inline. Read them
-as the maintainers telling you where to expect pain:
+Past ~100k lines, budget for the daemon and possibly remote caching — a migration that
+ignores this stalls on tooling, not on types.
 
-| Flag | mypy's own annotation | Reached by |
-|---|---|---|
-| `strict_equality` | "Getting this passing should be easy" | adding |
-| `check_untyped_defs` | "Strongly recommend enabling this one as soon as you can" | adding |
-| `disallow_subclassing_any` | "tricky to get passing if you use a lot of untyped libraries" | subtracting |
-| `disallow_untyped_decorators` | (same) | subtracting |
-| `disallow_any_generics` | (same) | subtracting |
-| `disallow_untyped_calls` / `_incomplete_defs` / `_defs` | "gradations of forcing use of type annotations" | adding, per module |
-| `no_implicit_reexport` | "return on investment is lower" | last |
-| `warn_return_any` | "tricky to get passing if you use a lot of untyped libraries" | subtract first |
-| `extra_checks` | catch-all, "technically correct but may not be practical" | last |
+## Step 6 — Write the annotation policy that funds the migration
 
-Start `strict = True`, subtract `warn_return_any` and `extra_checks` if the untyped-dependency
-count is high, and re-add as modules land.
-
-Past ~100,000 lines the run time becomes the constraint before the types do:
-
-> You can use mypy daemon to get much faster incremental mypy runs. The larger your project is,
-> the more useful this will be. If your project has at least 100,000 lines of code or so, you may
-> also want to set up remote caching for further speedups.
+> Developers should add annotations for any new code. It's also encouraged to write
+> annotations when you modify existing code. […] Prioritise annotating widely imported
+> modules, such as utilities or model classes.
 > — https://mypy.readthedocs.io/en/stable/existing_code.html
 
-## What "done" means
+Two written conventions — annotate new code, annotate on touch — plus early annotation of
+widely-imported modules. This is what makes the migration self-funding rather than
+sprint-dependent. `disallow_untyped_defs` per completed module (step 3) is the enforcement.
 
-Not "no `Any` anywhere" — that is unreachable with untyped third-party dependencies, and a plan
-that targets it stalls. The documented end state is:
+## Step 7 — Know what "done" means
 
-> An excellent goal to aim for is to have your codebase pass when run against mypy --strict. This
-> basically ensures that you will never have a type related error without an explicit
+> An excellent goal to aim for is to have your codebase pass when run against mypy --strict.
+> This basically ensures that you will never have a type related error without an explicit
 > circumvention somewhere (such as a # type: ignore comment).
 > — https://mypy.readthedocs.io/en/stable/existing_code.html
 
-"Passes `--strict` with every remaining error being a visible, counted circumvention." That
-requires `warn_unused_ignores = True` — without it, ignores that are no longer needed are never
-reported, suppressions accumulate, and the number grows monotonically even as coverage improves.
-Coverage becomes a tracked metric (annotation percentage, count of `type: ignore`), not a binary.
+The end state is *not* "no `Any` anywhere" — that is unreachable for a service with untyped
+third-party dependencies. It is **`--strict` exits 0, with every remaining error an explicit,
+visible circumvention** — countable decisions rather than oversights. Enable
+`warn_unused_ignores` so suppressions are audited rather than accumulating monotonically.
+
+**Exit criterion:** `mypy --strict` green, `warn_unused_ignores` on, and coverage tracked as
+a metric (annotation %, `# type: ignore` count) rather than a binary.
 
 ## When to stop and escalate
 
-- **A slice with no cross-module imports.** The green run proves nothing; pick a wider slice.
-- **`--disable-error-code=import-untyped` globally.** mypy warns about this itself: *"This can
-  hide errors later on, so we recommend avoiding this if possible."* It is the fastest way to
-  manufacture the green build this skill exists to prevent.
-- **The first ruff run is unmanageably large.** There is no documented escape hatch; narrow
-  `select` and narrow the CI path instead of suppressing.
-- **The codebase is past ~100k lines and runs are slow.** That is a tooling problem, not a typing
-  problem — daemon and remote caching come before more flags.
+- **`follow_imports` tuning is becoming the project.** mypy's own words: fine-grained import
+  control is *"very easy to silently shoot yourself in the foot when playing around with
+  these, so this should be a last resort."*
+- **You are considering `ignore_missing_imports = True` globally.** The docs recommend
+  avoiding it — *"this can hide errors later on"* — it is the widest possible `Any` hole.
+- **A dependency's missing stubs dominate the error count.** The remedy this skill does not
+  cover is stub packages / `py.typed` (PEP 561) — not sourced in the underlying research.
+  Escalate before papering over with ignores.
 
 ## Failure modes
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| 4,000 errors before any annotation is written | annotated before gating | step 2 — green run on a slice first |
-| Green CI, far less checked than it looks | `Any` on unfollowed imports plus suppressed errors | track both numbers from step 4 |
-| `follow_imports` on the wrong module | pattern must match the *imported* module | match the imported name, not the importer |
-| New module silently unchecked forever | inversion, with no `disallow_untyped_defs` | set it on every completed module |
-| `type: ignore` count only grows | `warn_unused_ignores` off | turn it on; the count must be able to fall |
-| `--strict` will not go green | untyped dependencies | subtract, per the table in step 6 |
-| Migration appears to stall | run time | daemon + remote caching past ~100k lines |
+| Green CI, but a real bug ships through it | unfollowed import became `Any`; every access succeeded | track reachable-but-unchecked, not just checked |
+| Config grows forever, nothing finishes | opt-in config; omissions invisible | invert: `ignore_errors = True` global, `False` per finished module |
+| Finished module regresses to untyped code | nothing enforces the floor | `disallow_untyped_defs = True` on completed modules |
+| `follow_imports` section has no effect | pattern matches the *importing* module | match the *imported* module name |
+| Odd cross-module type error, locally clean | consistency is non-transitive through `Any` | review `Any`-containing container types by hand |
+| `--strict` unreachable | strictness flags fail with untyped deps | start strict and subtract; mypy documents this direction |
+| mypy slow enough to stall work | corpus >100k lines | daemon; remote caching |
+| Suppressions only ever grow | ignores never audited | `warn_unused_ignores = True` |
 
 ## Verifying
 
 ```bash
-mypy --version
-mypy <your-slice>              # exits 0 — phase 1 criterion
-
-# 1. checked set vs. whole surface
-grep -c '^\[mypy-' mypy.ini
-find myapp -name '*.py' | wc -l
-
-# 2. the suppressed count must be able to fall
+# The two numbers — checked vs. reachable-but-unchecked
+grep -c 'ignore_errors = False' mypy.ini 2>/dev/null || grep -c 'ignore_errors = false' pyproject.toml
 grep -rn '# type: ignore' --include=*.py . | wc -l
-grep -rn 'warn_unused_ignores' mypy.ini
 
-# 3. where the guarantee is not holding
-mypy --strict 2>&1 | tail -20
-ruff check .
+# The suppressed set — this is the work queue
+grep -B1 'ignore_errors' mypy.ini 2>/dev/null
+
+# The end state
+mypy --strict .
+grep 'warn_unused_ignores' mypy.ini pyproject.toml 2>/dev/null || echo "warn_unused_ignores not set"
 ```
 
-## Known limits of this skill
+## Limits of this skill
 
-- **The phase ordering is documented, not tested in the wild.** Every source here is normative —
-  the typing spec, mypy's adoption guide, mypy's config reference, ruff's linter page. There is
-  **zero practitioner corroboration**: no source describing an actual migration on a large legacy
-  service and reporting where it broke. Read step 2–3 ordering as the documented default, not as
-  a battle-tested one.
-- **The installed-stubs remedy is not closed.** The `Any`-laundering failure mode in step 4 is
-  precisely what `py.typed` markers and stub packages exist to fix, and this skill does not cover
-  that remedy — neither PEP 561 nor the typing spec's distribution page was consulted. Step 4
-  tells you how to *measure* the hole, not how to close it. Installing stubs is the obvious first
-  move and is not written up here.
-- **Deferred annotation evaluation is not covered.** `from __future__ import annotations`, string
-  annotations, and PEP 649/749 change *when* annotations are evaluated. Nothing above depends on
-  eager evaluation, but nothing above is sourced on the deferred model either.
-- **mypy only.** pyright is not covered, so editor-time feedback is not compared against CI.
+Stated plainly, because they are real:
 
-## Sources
-
-- https://typing.python.org/en/latest/spec/concepts.html
-- https://mypy.readthedocs.io/en/stable/existing_code.html
-- https://mypy.readthedocs.io/en/stable/config_file.html
-- https://mypy.readthedocs.io/en/stable/running_mypy.html
-- https://docs.astral.sh/ruff/linter/
+- **Documented ordering, zero practitioner corroboration.** Every phase above comes from
+  normative docs and mypy's official adoption guide. No source that actually performed this
+  migration on a large legacy service and reported where it broke was read.
+- **The `py.typed` / stub-package remedy is deliberately not written up.** PEP 561 was not
+  read from source; only mypy's references to it. Step 4 manages the `Any` hole; it does not
+  close it.
+- **PEP 649/749 (deferred annotation evaluation) claims are inference, not sourced.** The
+  reasoning that deferred evaluation changes *when* annotations evaluate, not *whether*
+  gradual checking works, is defensible but was not verified against the PEPs.
+- **No pyright.** Nothing here is claimed about editor-time feedback; the workflow covers CI.

@@ -1,0 +1,6 @@
+{
+  "name": "nestjs-helper",
+  "description": "Helps with NestJS-related tasks, such as request scope migration and other NestJS best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}

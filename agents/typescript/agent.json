@@ -1,0 +1,6 @@
+{
+  "name": "typescript-helper",
+  "description": "Helps with TypeScript-related tasks, such as adopting strict checking and other TypeScript best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}

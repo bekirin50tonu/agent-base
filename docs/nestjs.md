@@ -78,7 +78,11 @@ summary: "Routing hub and decision matrix for NestJS assets."
   - **Target Location**: `docs/skills/nestjs/request-scope-to-als-migration/SKILL.md`
 
 ## 3. Agents (`agents/`)
-_Empty — no NestJS agents have been synthesized._
+
+- **Path**: `agents/nestjs/agent.json`
+  - **Why**: Helps with NestJS-related tasks, such as request scope migration and other NestJS best practices.
+  - **When**: Target project has `@nestjs/core`.
+  - **Target Location**: `docs/agents/nestjs/agent.json`
 
 ## 4. Shared Assets (`shared/`)
 _Empty — no NestJS-specific shared assets have been synthesized._

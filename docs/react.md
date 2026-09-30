@@ -96,7 +96,11 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
   - **Target Location**: `docs/skills/typescript/adopt-strict-checking-gradually/SKILL.md`
 
 ## 3. Agents (`agents/`)
-_Empty — no React agents have been synthesized._
+
+- **Path**: `agents/typescript/agent.json`
+  - **Why**: Helps with TypeScript-related tasks, such as adopting strict checking and other TypeScript best practices.
+  - **When**: Target project has a `tsconfig.json`.
+  - **Target Location**: `docs/agents/typescript/agent.json`
 
 ## 4. Shared Assets (`shared/`)
 - **Path**: `shared/design-patterns-library.md`

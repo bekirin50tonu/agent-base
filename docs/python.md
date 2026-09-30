@@ -63,7 +63,11 @@ summary: "Routing hub and decision matrix for Python assets."
   - **Target Location**: `docs/skills/python/adopt-mypy-on-a-legacy-codebase/SKILL.md`
 
 ## 3. Agents (`agents/`)
-_Empty — no Python agents have been synthesized._
+
+- **Path**: `agents/python/agent.json`
+  - **Why**: Helps with Python-related tasks, such as adopting mypy, ruff, and other Python best practices.
+  - **When**: Target project is a Python project (has `pyproject.toml` or `requirements.txt`).
+  - **Target Location**: `docs/agents/python/agent.json`
 
 ## 4. Shared Assets (`shared/`)
 - **Path**: `shared/tooling/uv-toolchain.md`

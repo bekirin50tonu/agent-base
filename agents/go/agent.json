@@ -1,0 +1,6 @@
+{
+  "name": "go-helper",
+  "description": "Helps with Go-related tasks, such as upgrading toolchain and language version, and applying Go best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
