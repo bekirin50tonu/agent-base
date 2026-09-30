@@ -93,7 +93,7 @@ and **when** it applies, so the skill can decide without guessing.
 | `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) + 1 skill (Spring Boot migration) + 1 agent + 1 shared asset |
 | `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) + 1 skill (.NET Framework → SDK-style) + 1 agent + 1 shared asset |
 | `docs/sql.md` | 3 rules (`NOT IN` nulls, disabled timeouts, `CREATE INDEX CONCURRENTLY`) + 1 skill (EXPLAIN-first) + 1 agent |
-| `docs/backend-architecture.md` | 8 rules (durable execution, dual-write, vertical slice, service extraction, idempotency keys, delivery guarantees, worker claims, trace propagation) + 1 shared asset |
+| `docs/backend-architecture.md` | 9 rules (durable execution, dual-write, vertical slice, service extraction, idempotency keys, delivery guarantees, worker claims, trace propagation, microservices vs monolith approaches) + 1 shared asset |
 | `docs/authentication.md` | 2 rules (JWT algorithm/key pinning per RFC 8725, browser token storage per RFC 10017) |
 | `docs/mcp.md` | 2 rules + 1 skill + 1 shared asset (agents empty) |
 

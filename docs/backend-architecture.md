@@ -46,7 +46,7 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
     rather than designed away.
   - **When**: Target project writes to a database and publishes to Kafka, RabbitMQ, NATS, or a
     cloud queue, or runs a polling job that reads changed rows to trigger downstream work.
-  - **Target Location**: `docs/rules/architecture/event-publishing-has-a-dual-write-problem.md`
+  - **Target Location`: `docs/rules/architecture/event-publishing-has-a-dual-write-problem.md`
 
 - **Path**: `rules/architecture/vertical-slice-organizes-by-feature.md`
   - **Why**: A controllers/services/repositories layout makes one feature's change span four
@@ -69,6 +69,11 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
   - **When**: Target project proposes extracting a module into a network service, or is
     adopting a microservice pattern for structure rather than for a trigger.
   - **Target Location**: `docs/rules/architecture/extract-a-service-only-for-a-named-trigger.md`
+
+- **Path**: `rules/architecture/microservices-vs-monolith-approaches.md`
+  - **Why**: Architectural style significantly impacts deployment complexity, team autonomy, scaling granularity, and operational overhead. Choosing microservices for the wrong reasons introduces distributed system complexity without benefits, while staying with a monolith too long creates deployment bottlenecks and coupling that hinders team productivity. The decision should align with concrete triggers like independent scaling needs, release cadence, team boundaries, and data ownership rather than architectural fashion.
+  - **When**: Target project is evaluating architectural styles for service decomposition or experiencing deployment bottlenecks, team coordination overhead, or scaling limitations with a monolithic architecture.
+  - **Target Location**: `docs/rules/architecture/microservices-vs-monolith-approaches.md`
 
 - **Path**: `rules/idempotency/idempotency-keys-are-client-generated-and-scoped.md`
   - **Why**: A retry is not rare — a client whose `POST` response was lost must choose between a
