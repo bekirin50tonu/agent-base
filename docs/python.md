@@ -12,7 +12,8 @@ summary: "Routing hub and decision matrix for Python assets."
 > `requirements.txt`). Match the conditions below to determine which `rules`, `skills`,
 > `agents`, or `shared` assets to inject.
 >
-> **Status**: rules and shared tooling are covered. No `skills` or `agents` yet.
+> **Status**: rules and shared tooling are covered, plus the mypy/ruff adoption workflow for
+> unannotated codebases. No `agents` yet.
 
 <!-- ASSET_MANIFEST_START -->
 
@@ -43,7 +44,23 @@ summary: "Routing hub and decision matrix for Python assets."
   - **Target Location**: `docs/rules/free-threading-overhead.md`
 
 ## 2. Skills (`skills/`)
-_Empty — no Python skills have been synthesized._
+
+- **Path**: `skills/python/adopt-mypy-on-a-legacy-codebase/SKILL.md`
+  - **Why**: The documented order runs the checker *before* any annotation exists, and the
+    config inverts to `ignore_errors = True` globally with `False` per finished module — so the
+    config file is a work queue whose shrinking entry count is the progress metric. Starts from
+    the fact that the typing spec names the gradual guarantee and then explicitly declines to
+    enforce it, which is why every escape hatch (`ignore_errors`, `type: ignore`,
+    `follow_imports`) is a place the guarantee silently stops holding. Includes the two-numbers
+    rule — modules checked vs. modules reachable-but-unchecked — because an unfollowed import
+    becomes `Any` silently and you get a green build checking less than its output implies.
+    Carries its own limits: documented ordering, zero practitioner corroboration, and the
+    `py.typed` remedy deliberately not written up.
+  - **When**: Target project is Python with substantial code and little or no type annotation,
+    and is adding mypy, adding a type gate to CI, or growing the checked-module set without a
+    big-bang flip. Also when a type gate already exists and a green run is not evidence that
+    the covered surface is what it appears to be.
+  - **Target Location**: `docs/skills/python/adopt-mypy-on-a-legacy-codebase/SKILL.md`
 
 ## 3. Agents (`agents/`)
 _Empty — no Python agents have been synthesized._

@@ -13,7 +13,8 @@ summary: "Routing hub and decision matrix for Go assets."
 > inject.
 >
 > **Status**: rules cover context lifetime and goroutine exit — the two places Go's implicit
-> control flow is most often wrong. No `skills` or `agents` yet.
+> control flow is most often wrong — plus the toolchain/language-version upgrade workflow. No
+> `agents` yet.
 
 <!-- ASSET_MANIFEST_START -->
 
@@ -62,7 +63,11 @@ summary: "Routing hub and decision matrix for Go assets."
   - **Target Location**: `docs/rules/goroutine-lifetime-obvious.md`
 
 ## 2. Skills (`skills/`)
-_Empty — no Go skills have been synthesized._
+
+- **Path**: `skills/go/upgrade-toolchain-and-language-version/SKILL.md`
+  - **Why**: A Go version bump is two acts, not one. The toolchain and the `go` line are independent axes — bumping the toolchain is free and recommended, while the `go` line is a compatibility contract that must be staged. Classifies every change across releases as loud (compiler catches it) or silent (only reading the GODEBUG history catches it), including the class that no `go.mod` diff can reveal.
+  - **When**: Target project has a `go.mod`, and a newer Go release is available or being adopted — or when auditing behaviour changes before a `go` line increment.
+  - **Target Location**: `docs/skills/go/upgrade-toolchain-and-language-version/SKILL.md`
 
 ## 3. Agents (`agents/`)
 _Empty — no Go agents have been synthesized._

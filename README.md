@@ -84,10 +84,10 @@ and **when** it applies, so the skill can decide without guessing.
 
 | Hub | Routes |
 |---|---|
-| `docs/python.md` | 3 rules + 1 shared asset |
-| `docs/go.md` | 5 rules |
-| `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 shared asset |
-| `docs/nestjs.md` | 4 rules + 1 skill |
+| `docs/python.md` | 3 rules + 1 skill (mypy/ruff adoption) + 1 shared asset |
+| `docs/go.md` | 5 rules + 1 skill (toolchain vs. language version) |
+| `docs/react.md` | 8 rules (5 React, 3 Next.js-scoped) + 1 skill (TS strict) + 1 shared asset |
+| `docs/nestjs.md` | 4 rules + 1 skill (request-scope to ALS) |
 | `docs/java.md` | 4 rules (Spring `@Async`, proxy mechanics, virtual threads) |
 | `docs/dotnet.md` | 5 rules (cancellation, discarded tasks, task composition, thread-pool starvation, hosted work) |
 

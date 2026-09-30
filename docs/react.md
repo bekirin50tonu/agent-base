@@ -14,7 +14,8 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
 >
 > **Status**: rules cover data fetching end to end — where the waterfall comes from, the two
 > mechanisms that remove it, and the Effect dependency rules that follow from it. Verified
-> against react@19.3 and next@16.3.7. No `skills` or `agents` yet.
+> against react@19.3 and next@16.3.7. The TypeScript strict-adoption skill is routed here too,
+> since every React and Next.js project is a TypeScript project. No `agents` yet.
 
 <!-- ASSET_MANIFEST_START -->
 
@@ -88,7 +89,11 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
   - **Target Location**: `docs/rules/nextjs-two-caching-models.md`
 
 ## 2. Skills (`skills/`)
-_Empty — no React skills have been synthesized._
+
+- **Path**: `skills/typescript/adopt-strict-checking-gradually/SKILL.md`
+  - **Why**: TypeScript 6.0 makes `strict` `true` by default, so the gradual path is now an opt-*out* and a 5.x-era migration plan walks backwards. Gives the documented order (`noImplicitAny` first, chosen for error locality rather than severity), the `ts5to6` codemod for 6.0's mechanical adjustments, and the `rootDir` default change that surfaces with no error message pointing at it. Also why `checkJs` has no reachable exit criterion.
+  - **When**: Target project has a `tsconfig.json` and is enabling strict checking, adding `noImplicitAny` or `checkJs`, or upgrading into TypeScript 6.0+ and seeing errors it did not ask for. Applies to plain React, Next.js, and NestJS projects alike.
+  - **Target Location**: `docs/skills/typescript/adopt-strict-checking-gradually/SKILL.md`
 
 ## 3. Agents (`agents/`)
 _Empty — no React agents have been synthesized._
