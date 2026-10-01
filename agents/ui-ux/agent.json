@@ -1,0 +1,5 @@
+{
+  "name": "ui-ux-agent",
+  "description": "Helps with UI/UX-related tasks, such as planning research activities, creating wireframes, prototyping, and conducting usability tests.",
+  "tools": ["*"]
+}
