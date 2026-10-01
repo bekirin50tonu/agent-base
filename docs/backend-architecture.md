@@ -133,6 +133,33 @@ summary: "Routing hub and decision matrix for cross-cutting backend architecture
   - **When**: Target project uses Kubernetes namespaces to separate environments, teams, or components and needs to understand isolation limits.
   - **Target Location**: `docs/rules/kubernetes/namespaces-are-not-a-tenancy-boundary.md`
 
+- **Path**: `rules/architecture/dto-boundary-is-the-security-boundary.md`
+  - **Why**: A DTO's job is not carrying data but declaring which fields the client may write.
+  OWASP classifies the alternative as CWE-915 Mass Assignment and names the reason APIs make
+  it easier — they expose the property names by design, so an attacker who reads `credit_balance`
+  off a `GET` can write it back on a `PUT`. The rule draws the line that most code crosses: a field
+  hidden from serialization is not protected from binding. `[BindNever]` is not respected during
+  JSON model binding (dotnet/aspnetcore#39337), and `JsonIgnore` blocks both directions, so the
+  same type cannot be both the input contract and the response — which is exactly why ASP.NET
+  Core's own maintainer answers "use a view model." Also separates Fowler's DTO (fewer remote
+  calls) from OWASP's (smaller binding surface): they share code, not a guarantee.
+  - **When**: Target project accepts a request body into an object, returns an entity or ORM model
+  directly, or protects a field with a serialization attribute and believes the field is closed.
+  - **Target Location**: `docs/rules/architecture/dto-boundary-is-the-security-boundary.md`
+
+- **Path**: `rules/architecture/a-shared-entity-carries-fields-it-must-not-expose.md`
+  - **Why**: The other half of the boundary. OWASP's allow-list keeps `isAdmin` off the input
+  DTO, but the entity type keeps living — in response paths, domain services, background jobs —
+  and its fields leak on the read side. That leak is not an attack by itself, it is the map for
+  one: the attacker learns `credit_balance` exists from the `GET` and writes it on the `POST`.
+  So a boundary has to be declared in both directions — which fields bind, and which fields
+  publish — and OWASP's "explicitly define **and enforce** schemas" is the requirement that a
+  serialization setting does not satisfy, since it changes when the endpoint changes.
+  - **When**: Target project shares one entity type across persistence and API layers, hides
+  sensitive fields with `JsonIgnore` or an ignore-cycles handler, or returns ORM entities with
+  `Include` chains from a controller.
+  - **Target Location**: `docs/rules/architecture/a-shared-entity-carries-fields-it-must-not-expose.md`
+
 - **Path**: `rules/kubernetes/resource-requests-limits-qos-class.md`
   - **Why**: Resource requests and limits determine QoS class (Guaranteed/Burstable/BestEffort), which influences scheduling and eviction decisions.
   - **When**: Target project sets resource requests/limits on containers or pods and needs to understand scheduling and eviction behavior.
