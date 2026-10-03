@@ -20,8 +20,11 @@ The framework documents the textbook case under eager loading, but the case it e
 one eager loading does **not** fix:
 
 > **Even when utilizing Eloquent eager loading**, "N + 1" query problems can arise if you try to
-> access the parent model from a child model while looping through the child models […]
-> **Eloquent does not automatically hydrate the parent Post on each child Comment model.**
+> access the parent model from a child model while looping through the child models:
+>
+> […] an "N + 1" query problem has been introduced because, even though comments were eager
+> loaded for every `Post` model, **Eloquent does not automatically hydrate the parent `Post` on
+> each child `Comment` model.**
 > ([Laravel 12.x Eloquent Relationships](https://laravel.com/framework/docs/12.x/eloquent-relationships))
 
 So `$comment->post->title` over a collection of comments costs one query per comment *even though*

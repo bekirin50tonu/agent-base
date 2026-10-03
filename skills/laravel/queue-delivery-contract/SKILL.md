@@ -140,7 +140,11 @@ arrives with `after_commit => true` (or per-job `->afterCommit()`).
 
 Do not confuse the two axes. `->afterCommit()` is a *transaction* boundary;
 `->onConnection('deferred')` / `'background'` is a *response* boundary — a separately spawned
-process. A job needing the second cannot get it from the first.
+process. A job needing the second cannot get it from the first, and a job needing the first still
+needs it on them: `deferred` and `background` carry **no `after_commit` key** in `config/queue.php`
+(unlike `redis`/`database`/`sqs`/`beanstalkd`, which set it to `false` explicitly), and
+`SyncConnector` passes `$config['after_commit'] ?? null` into a resolution that ends in `?? false`.
+Absent therefore means immediate, not "deferred until commit".
 
 ```bash
 grep -rn "'after_commit'" config/queue.php

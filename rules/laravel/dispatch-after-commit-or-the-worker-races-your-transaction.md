@@ -5,7 +5,7 @@ category: "correctness"
 scope: "backend"
 applies_to: "Any dispatch() call made inside DB::transaction(), or from a model observer/event listener that runs within one"
 last_updated: "2026-10-03"
-source: "https://raw.githubusercontent.com/livewire/laravel-docs/12.x/queues.md,https://raw.githubusercontent.com/laravel/framework/12.x/config/queue.php"
+source: "https://raw.githubusercontent.com/livewire/laravel-docs/12.x/queues.md,https://raw.githubusercontent.com/laravel/framework/12.x/config/queue.php,https://raw.githubusercontent.com/laravel/framework/12.x/src/Illuminate/Queue/Queue.php,https://raw.githubusercontent.com/laravel/framework/12.x/src/Illuminate/Queue/Connectors/SyncConnector.php"
 ---
 
 # Dispatch After Commit, or the Worker Races the Transaction That Spawned It
@@ -51,6 +51,25 @@ belongs to the *corrected* behaviour:
 Under `after_commit => false`, a `ROLLBACK` leaves the job on the queue, running against rows that
 never existed.
 
+### Two connections ship without the key at all
+
+`config/queue.php` writes `after_commit => false` explicitly on the four worker-backed connections
+(`database`, `beanstalkd`, `sqs`, `redis`). The two response-boundary connections carry **no
+`after_commit` key whatsoever**:
+
+```php
+'deferred' => ['driver' => 'deferred'],
+'failover' => ['driver' => 'failover', 'connections' => ['database', 'deferred']],
+```
+([Laravel 12.x `config/queue.php`](https://raw.githubusercontent.com/laravel/framework/12.x/config/queue.php))
+
+That omission is not a looser default. `SyncConnector::connect()` passes
+`$config['after_commit'] ?? null`, and `Queue::shouldDispatchAfterCommit()` ends in
+`return $this->dispatchAfterCommit ?? false` — so a missing key resolves to `false` by the same
+route. `DeferredQueue extends SyncQueue`, and `BackgroundQueue::push()` hands the job to
+`Queue::connection('sync')`, which carries the same resolution. Both therefore dispatch
+immediately, and `->afterCommit()` is required on them exactly as on `redis`.
+
 ## Do
 
 - Mark the job, so the dispatch defers to commit and a rollback discards it:
@@ -72,7 +91,10 @@ never existed.
   // After the HTTP response — a separately spawned process, NOT a commit guarantee
   RecordDelivery::dispatch($order)->onConnection('background');
   ```
-  A job needing the second cannot get it from the first.
+  A job needing the second cannot get it from the first. The response boundary does not
+  substitute for the commit one: `deferred` and `background` run *after* the response, and a
+  response is only sent after the transaction has already resolved. If the job must not run on a
+  rollback, `->afterCommit()` is still required.
 - In tests, assert the ordering rather than trusting a passing suite: a local run usually has the
   worker lose the race, so the bug reproduces under production load, not on your laptop.
 

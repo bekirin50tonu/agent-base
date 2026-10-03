@@ -35,8 +35,11 @@ on update.
 The same principle appears on the queue side of the same codebase. The operator-supplied
 `jpswade` gist (trust 0.85 — attributed opinion, not framework fact) puts it this way:
 
-> Handle methods should contain very little code — Both jobs and commands there are `handle()`
-> functions […] think of them as similar to controllers, they should be lightweight.
+> ### Handle methods should contain very little code
+>
+> Both jobs and commands there are `handle()` functions. These should contain as little logic as
+> possible, think of them as similar to controllers, they should be lightweight.
+> ([jpswade gist](https://gist.github.com/jpswade/4c57a7caf7b2e130109579255538960e))
 
 That is the job-side instance of the controller-side rule. A `handle()` holding domain logic is a
 controller with the one saving grace removed — it has no request object to validate against, so
