@@ -1,0 +1,6 @@
+{
+  "name": "php-helper",
+  "description": "Helps with PHP/Laravel-related tasks, such as queue delivery guarantees, Eloquent mass assignment, and other Laravel best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
