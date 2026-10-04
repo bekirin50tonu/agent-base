@@ -1,6 +1,6 @@
 ---
 title: "`acks` levels lose records in different ways, and `acks=0` also disables retries"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-006"
 category: "correctness"
 scope: "all"
 applies_to: "acks, durability, producer config, leader election, replica.lag.time.max.ms"
@@ -55,7 +55,7 @@ cluster whose ISR can shrink to zero under a broad failure does not have it, whi
 - Use `acks=all` unless you have a measured reason not to, and pair it with `min.insync.replicas` so
   the guarantee is real rather than nominal.
 - Set `enable.idempotence=true` alongside it — that requires `acks` to be `all` anyway, and turns a
-  config slip into a startup failure (see `RULE-KAFKA-009`).
+  config slip into a startup failure (see `RULE-KAFKA-005`).
 - Keep `acks=all` with `retries > 0` so a transient failure is retried rather than surfaced as a
   lost record.
 - If throughput forces `acks=1`, treat it as an explicit availability-over-durability choice and

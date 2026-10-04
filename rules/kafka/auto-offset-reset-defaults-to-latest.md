@@ -1,6 +1,6 @@
 ---
 title: "`auto.offset.reset` defaults to `latest`, so a new group silently skips the backlog"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-003"
 category: "correctness"
 scope: "all"
 applies_to: "auto.offset.reset, consumer group, new group, retention, partition count, backfill"
@@ -105,7 +105,7 @@ grep -rln 'ConsumerConfig\|KafkaConsumer\|confluent_kafka\|kafka-python' --inclu
 ```
 
 What this check cannot see: grep finds declarations, not the values the client used — the same gap as
-`RULE-KAFKA-009`. Step 2 is a heuristic and will list consumers that configure the value through a
+`RULE-KAFKA-002`. Step 2 is a heuristic and will list consumers that configure the value through a
 builder, a YAML file it does not scan, or a shared base class. What settles it is step 3, and the
 specific thing to look for is `-1`: that is the broker reporting a group with no committed offset,
 which is exactly the condition under which `auto.offset.reset` decides the outcome. A consumer that

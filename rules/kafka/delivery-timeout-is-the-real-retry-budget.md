@@ -1,6 +1,6 @@
 ---
 title: "`delivery.timeout.ms` must exceed `request.timeout.ms` + `linger.ms`"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-007"
 category: "correctness"
 scope: "all"
 applies_to: "delivery.timeout.ms, request.timeout.ms, linger.ms, retries, TimeoutException, replica.lag.time.max.ms"

@@ -62,7 +62,7 @@ Then the choice disappears:
 > ([Consumer Rebalance Protocol](https://kafka.apache.org/43/operations/consumer-rebalance-protocol/))
 
 At 5.0 the default flips with no config change. Every consumer that never set `group.protocol` moves
-to the branch where its client-side timeouts stop applying (see `RULE-KAFKA-009`) and its assignor
+to the branch where its client-side timeouts stop applying (see `RULE-KAFKA-008`) and its assignor
 selection stops mattering.
 
 ## Do

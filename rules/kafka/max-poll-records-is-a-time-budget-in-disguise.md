@@ -1,6 +1,6 @@
 ---
 title: "`max.poll.records` is a time budget: 500 records against a 5-minute poll interval"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-004"
 category: "concurrency"
 scope: "all"
 applies_to: "max.poll.records, max.poll.interval.ms, poll loop, rebalance, consumer lag, backpressure"
@@ -52,7 +52,7 @@ buffering:
 It reduces how much you must *finish* per cycle — exactly the quantity the deadline constrains.
 
 With `enable.auto.commit` also on its default, this compounds: offsets commit while the slow member
-is being evicted, so the work is both slow *and* unrecorded. See `RULE-KAFKA-009`.
+is being evicted, so the work is both slow *and* unrecorded. See `RULE-KAFKA-002`.
 
 ## Do
 

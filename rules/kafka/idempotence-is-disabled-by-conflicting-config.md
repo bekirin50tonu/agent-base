@@ -1,6 +1,6 @@
 ---
 title: "`enable.idempotence` defaults to true and conflicting config silently disables it"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-005"
 category: "correctness"
 scope: "all"
 applies_to: "enable.idempotence, retries, acks, max.in.flight.requests.per.connection, duplicate records"
@@ -66,7 +66,7 @@ update now processes an older record last.
   `ConfigException` naming the conflict, which is the behaviour you want.
 - Keep `acks=all`, `retries > 0`, and `max.in.flight.requests.per.connection <= 5` — the three
   conditions, and the last one exactly so.
-- Control retry behaviour with `delivery.timeout.ms` (see `RULE-KAFKA-009`), not by setting
+- Control retry behaviour with `delivery.timeout.ms` (see `RULE-KAFKA-007`), not by setting
   `retries=0`.
 - Assert the trio at startup so a config change that breaks the combination fails at boot rather
   than in production traffic.
@@ -83,7 +83,7 @@ update now processes an older record last.
   unaffected. Above 5 the broker "only retains at most 5 batches for each producer", so earlier
   batches may be dropped.
 - Don't read "idempotence is enabled by default" as a durability guarantee. It dedupes retries; it
-  says nothing about whether the record reaches the log — that is `acks`, see `RULE-KAFKA-009`.
+  says nothing about whether the record reaches the log — that is `acks`, see `RULE-KAFKA-006`.
 - Don't treat a successful send as a durable record when `acks` is not `all`.
 
 ## Failure modes

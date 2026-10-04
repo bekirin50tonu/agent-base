@@ -1,6 +1,6 @@
 ---
 title: "`enable.auto.commit` defaults to `true`, so offsets advance past unprocessed records"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-002"
 category: "correctness"
 scope: "all"
 applies_to: "enable.auto.commit, offset commit, consumer groups, at-most-once, at-least-once"
@@ -72,7 +72,7 @@ That ordering *is* at-least-once. The shipped default is at-most-once with a tim
 - Don't rely on the default and add error handling later. The default is invisible in review — it is
   the absence of a line, not a line.
 - Don't mix `commitSync` with per-record commits in a tight loop. The round trip will dominate and
-  will likely push you past `max.poll.interval.ms` — see `RULE-KAFKA-009`.
+  will likely push you past `max.poll.interval.ms` — see `RULE-KAFKA-004`.
 
 ## Failure modes
 

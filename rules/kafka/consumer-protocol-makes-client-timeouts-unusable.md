@@ -1,6 +1,6 @@
 ---
 title: "`group.protocol=consumer` silently ignores three client timeout settings"
-rule_id: "RULE-KAFKA-009"
+rule_id: "RULE-KAFKA-008"
 category: "correctness"
 scope: "all"
 applies_to: "group.protocol, heartbeat.interval.ms, session.timeout.ms, partition.assignment.strategy, group.consumer.session.timeout.ms"
