@@ -1,0 +1,6 @@
+{
+  "name": "rust-helper",
+  "description": "Helps with Rust-related tasks, such as async and concurrency architecture, trait design for dyn compatibility, and applying Rust best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
