@@ -148,5 +148,5 @@ version-gated:
 
 Both mean the same code can behave correctly on one version and incorrectly on another without
 any change of intent — check the lockfile before assuming a date bug is an application bug.
-There is a separate `docs/php.md` and `docs/laravel.md` hub; this one covers the date-time
+There is a separate `docs/laravel.md` hub; this one covers the date-time
 library itself and overlaps with those only on Eloquent's date casts.

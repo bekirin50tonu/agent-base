@@ -28,7 +28,7 @@ summary: "Routing hub and decision matrix for Carbon, PHP date-time and time-moc
 > `CarbonInterval` where they returned a native `DateInterval`. `setTestNow()` stopped carrying a
 > timezone in **2.56.0** — before that it forced the mock's timezone onto `Carbon::now()`, so a
 > suite asserting hours could differ between machines on the same lockfile. Check the installed
-> version before attributing a date defect to application code. There are separate `docs/php.md`
+> version before attributing a date defect to application code. There is a separate `docs/laravel.md`
 > and `docs/laravel.md` hubs; this one covers the date-time library itself and overlaps with
 > those only on Eloquent's date casts.
 

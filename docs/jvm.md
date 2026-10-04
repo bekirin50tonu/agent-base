@@ -20,7 +20,7 @@ summary: "Routing hub for the JVM runtime itself: virtual threads, structured co
 > **Scope**: this hub is the JVM runtime and the Java language features that change how a program
 > behaves under concurrency or across a deployment. It does **not** cover frameworks —
 > `ExecutorService` semantics as Spring configures them, `@Async`, JPA or Spring Security live in
-> the `Java` topic (`docs/java.md`), and there is a separate `docs/laravel.md`, `docs/rails.md` and
+> the `Java` topic (`docs/java.md`), and there is a separate `docs/laravel.md`, `docs/ruby.md` and
 > `docs/python.md`. A project can match both hubs; judge each entry separately. If the defect is
 > "the framework did not do what its documentation says", it is not this hub.
 >
