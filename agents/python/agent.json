@@ -1,6 +1,6 @@
 {
   "name": "python-helper",
-  "description": "Helps with Python-related tasks, such as adopting mypy, ruff, and other Python best practices.",
+  "description": "Helps with Python-related tasks, such as adopting mypy, ruff, and other Python best practices, plus Django, FastAPI and Flask web framework work: ORM query shape and transactions, request validation and response allowlists, session and config handling, async/sync boundaries, and background job selection.",
   "model": "sonnet",
   "tools": ["*"]
 }
