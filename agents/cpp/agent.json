@@ -1,0 +1,6 @@
+{
+  "name": "cpp-helper",
+  "description": "Helps with C++-related tasks, such as choosing between unique_ptr, shared_ptr and weak_ptr, picking memory_order values and separating relaxed counters from release/acquire publication, spotting volatile used as synchronization, std::move lifetime rules, and applying the rule of zero to classes with destructors.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
