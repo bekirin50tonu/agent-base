@@ -1,0 +1,6 @@
+{
+  "name": "carbon-helper",
+  "description": "Helps with Carbon and PHP date-time tasks, such as freezing time in a test without leaking the mock into the rest of the process, choosing between mutable Carbon and CarbonImmutable for a stored date, adding a month without overflowing past the end of the month, reading diffIn*() results as a signed float rather than a distance, using ISO week numbers with an ISO week-year rather than the calendar year, keeping relative phrases and locale settings out of stored values, and never unserializing a date from an untrusted source.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
