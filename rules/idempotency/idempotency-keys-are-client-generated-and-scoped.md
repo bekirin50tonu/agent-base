@@ -59,7 +59,7 @@ def handle(req):
 - **Don't accept low-entropy or client-controlled-format keys.** The draft's own security section names both injection (key value used in a lookup you did not validate) and enumeration ("attackers MAY determine other keys and use them to fetch existing idempotent cache entries") as live threats.
 - **Don't reserve the key for failed requests.** A 400/422/409 validation failure never mutated anything — leaving the key resident makes the client's corrective retry return the error forever.
 - **Don't claim exactly-once.** Idempotency gives *effectively-once within a window*. Operations with no natural upper bound on retry distance need a unique constraint on a business key.
-- **Don't reuse one key for a different payload.** Detect it (compare a request fingerprint — checksum of the body) and return `422` or `409`. Silently returning the old response for a different request is worse than not deduplicating at all.
+- **Don't reuse one key for a different payload.** Detect it (compare a request fingerprint — checksum of the body) and return `422`. The draft names this status explicitly: *"the resource SHOULD reply with a HTTP 422 status code"* for *"reuse an idempotency key with a different request payload"*. Silently returning the old response for a different request is worse than not deduplicating at all. `409` is the *other* case — a retry arriving while the original is still in flight — and using it for both conflates a client bug with a healthy in-progress request.
 
 ## Failure modes
 
@@ -70,14 +70,14 @@ def handle(req):
 | Retried 400 persists after the input was corrected | Key reserved before validation | Reserve only after validation passes and before the write |
 | Retry 24h later produces a second write | Window shorter than the retry horizon | Lengthen the window, or add a unique constraint on a business key |
 | Second concurrent request gets `200` for a half-written state | Key reservation and response write not atomic | Reserve with `SET NX`, fill after commit, replay only filled slots |
-| Different body, same key, old response returned | No fingerprint comparison | Hash the body; on mismatch return `409` |
+| Different body, same key, old response returned | No fingerprint comparison | Hash the body; on mismatch return `422` |
 | Latency spike on every duplicate | Live re-execution instead of replay | Cache the serialized response at reserve time |
 
 ## Verifying
 
 1. `curl -X POST "$API/charges" -H "Idempotency-Key: $K" -d '{"amount":1}'` twice; assert the second response body and status byte-match the first.
 2. Repeat step 1 with a second account's bearer token and the *same* `$K`; assert it creates a new resource rather than replaying account one's response.
-3. Change the request body while keeping `$K`; assert `409`/`422`, not a replay.
+3. Change the request body while keeping `$K`; assert `422`, not a replay.
 4. Send `$K` with `{"amount": 99999999}` (violates validation); assert the key is released — repeat the corrected call with the same `$K` and assert it succeeds.
 5. `grep -rn "Idempotency-Key" <target>` and confirm the value is parsed and validated before any datastore call.
 
@@ -85,5 +85,6 @@ def handle(req):
 
 - `Idempotency-Key` is **not an RFC**. `draft-ietf-httpapi-idempotency-key-header-07` reached IESG evaluation and the datatracker records it as **Expired & archived** (last updated 2026-04-18; latest revision 2025-10-15). The header is a widely-used convention (Stripe and others), not a standard. Say "de-facto" in review notes, not "per RFC".
 - `RFC 9110` defines *method-level* idempotency (§9.2.2) only — `OPTIONS`, `HEAD`, `GET`, `PUT`, `DELETE`. It deliberately does not cover `POST`. This rule is about the header convention, which fills exactly that gap. Quoted: *"Per [RFC9110], the methods OPTIONS, HEAD, GET, PUT and DELETE are idempotent while methods POST and PATCH are not."*
-- The 409-on-fingerprint-mismatch choice is our judgement from the draft's §2.2 prohibition (*"MUST NOT be reused with another request with a different request payload"*); the draft does not name a status code.
+- The draft **does** name a status code for fingerprint mismatch, and it is `422`, not `409` (§2.3: *"If there is an attempt to reuse an idempotency key with a different request payload, the resource SHOULD reply with a HTTP 422 status code with body containing a link pointing to relevant documentation. The status code 422 is defined in Section 15.5.21 of [RFC9110]"*). An earlier revision of this rule claimed otherwise and prescribed `409`; that was wrong, and conflating the two statuses hides a client bug behind what reads as a retryable conflict. See `rules/idempotency/reuse-with-different-payload-is-422-not-a-dedup-hit.md`.
+- `409` is the draft's status for a *concurrent* retry — the original still in flight — and it is the one error where clients need no correction before retrying (§2.6).
 - We did not verify the reservation/reservation-fill protocol against a specific production library; the shape above is derived from the draft's security recommendations and the atomicity requirement. Audit your own datastore's concurrency primitives before copying it.
