@@ -1,6 +1,6 @@
 ---
 title: "KRaft Replaces ZooKeeper in Kafka"
-rule_id: "RULE-KAFKA-001"
+rule_id: "RULE-KAFKA-008"
 category: "architecture"
 scope: "all"
 applies_to: "Kafka"

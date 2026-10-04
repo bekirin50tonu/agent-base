@@ -12,9 +12,11 @@ summary: "Routing hub and decision matrix for messaging assets."
 > Match the conditions below to determine which `rules`, `skills`, `agents`, or
 > `shared` assets to inject.
 
-> **Status**: 8 rules covering RabbitMQ exchange and binding topology, quorum vs classic queues,
-> delivery limit behavior, Kafka KRaft replacing ZooKeeper, schema evolution safety, consumer lag monitoring,
-> dead letter queue patterns, and message ordering/exactly-once semantics, plus the existing 2 rules
+> **Status**: 16 rules covering RabbitMQ exchange and binding topology, quorum vs classic queues,
+> delivery limit behavior, Kafka KRaft replacing ZooKeeper, Kafka consumer and producer defaults
+> (auto-commit, offset reset, poll-interval budget, idempotence, `acks`, delivery timeout, and the
+> two rebalance-protocol rules), schema evolution safety, consumer lag monitoring, dead letter queue
+> patterns, and message ordering/exactly-once semantics, plus the existing 2 rules
 > (`at-least-once-is-the-guarantee-you-get.md` and `concurrent-workers-need-a-real-claim-strategy.md`).
 
 > **Scope**: This hub covers message broker patterns, delivery guarantees, consumer behaviors,
@@ -45,6 +47,46 @@ summary: "Routing hub and decision matrix for messaging assets."
   - **Why**: Kafka KRaft mode replaces ZooKeeper with an internal Raft-based metadata controller, simplifying deployment and removing external dependency.
   - **When**: Target project uses Kafka and needs to understand the migration path from ZooKeeper to KRaft or configure new clusters in KRaft mode.
   - **Target Location**: `docs/rules/kafka/kraft-replaces-zookeeper.md`
+
+- **Path**: `rules/kafka/auto-commit-defaults-to-true.md`
+  - **Why**: `enable.auto.commit` defaults to true, so the library commits offsets on a timer the consumer never chose and never sees. A record processed but not yet applied downstream is marked consumed anyway, and a crash loses it with no error.
+  - **When**: Target project runs a Kafka consumer group and offset handling, reprocessing, or idempotency was never an explicit decision.
+  - **Target Location**: `docs/rules/kafka/auto-commit-defaults-to-true.md`
+
+- **Path**: `rules/kafka/auto-offset-reset-defaults-to-latest.md`
+  - **Why**: `auto.offset.reset` defaults to `latest`, so a consumer with no committed offset — a new group, or one whose offsets expired — silently skips the entire retained backlog and reports zero lag while doing it.
+  - **When**: Target project builds state from a Kafka stream, or a consumer group has produced unexpectedly empty or partial output.
+  - **Target Location**: `docs/rules/kafka/auto-offset-reset-defaults-to-latest.md`
+
+- **Path**: `rules/kafka/max-poll-records-is-a-time-budget-in-disguise.md`
+  - **Why**: The defaults of 500 records and a 5-minute poll interval impose a 600 ms per-record deadline that neither setting states. Exceeding it evicts the consumer from the group and triggers a rebalance storm in which every member is healthy and merely slow.
+  - **When**: Target project has a Kafka poll loop doing per-record I/O, or sees repeated rebalances with no corresponding failures.
+  - **Target Location**: `docs/rules/kafka/max-poll-records-is-a-time-budget-in-disguise.md`
+
+- **Path**: `rules/kafka/idempotence-is-disabled-by-conflicting-config.md`
+  - **Why**: `enable.idempotence` defaults to true but is silently disabled when conflicting configs are set and it is not stated explicitly; the resulting `ConfigException` only fires when it is enabled explicitly. Retries can then produce duplicates in production and pass in tests.
+  - **When**: Target project configures Kafka producer retries, or is deduplicating consumer output to compensate for at-least-once delivery.
+  - **Target Location**: `docs/rules/kafka/idempotence-is-disabled-by-conflicting-config.md`
+
+- **Path**: `rules/kafka/acks-levels-have-different-failure-modes.md`
+  - **Why**: The three `acks` levels are three guarantees with three failure modes: `acks=0` makes retries inert and returns offset `-1` always, while `acks=1` acknowledges before replication, so a leader failure loses an acknowledged record with no producer error.
+  - **When**: Target project chooses producer durability settings, or is investigating records that disappeared without any surfaced error.
+  - **Target Location**: `docs/rules/kafka/acks-levels-have-different-failure-modes.md`
+
+- **Path**: `rules/kafka/delivery-timeout-is-the-real-retry-budget.md`
+  - **Why**: `retries` cannot express a time bound; `delivery.timeout.ms` does, and must be at least `request.timeout.ms` + `linger.ms`. Tuning either one for throughput or a slow broker breaks the invariant, and the resulting `TimeoutException` rate worsens when `linger.ms` is raised to help.
+  - **When**: Target project sees Kafka `TimeoutException` on send, or tunes `linger.ms`, `request.timeout.ms`, or retry settings on a producer.
+  - **Target Location**: `docs/rules/kafka/delivery-timeout-is-the-real-retry-budget.md`
+
+- **Path**: `rules/kafka/consumer-protocol-makes-client-timeouts-unusable.md`
+  - **Why**: Setting `group.protocol=consumer` makes `heartbeat.interval.ms`, `session.timeout.ms`, and `partition.assignment.strategy` unusable — no warning — and replaces them with broker-side `group.consumer.*` configs whose heartbeat default is 5000 ms against the client's 3000 ms, silently widening failure detection.
+  - **When**: Target project sets or is planning `group.protocol=consumer`, or its Kafka client timeout behaviour changed across a version upgrade.
+  - **Target Location**: `docs/rules/kafka/consumer-protocol-makes-client-timeouts-unusable.md`
+
+- **Path**: `rules/kafka/group-protocol-conversion-needs-an-empty-group.md`
+  - **Why**: Online migration off the classic rebalance protocol is available only when the group uses an assignor that embeds no custom metadata, which a custom `ConsumerPartitionAssignor` always does. The four stock assignors collapse to two server-side ones, and Kafka 5.0 flips the default with no config change.
+  - **When**: Target project uses a custom partition assignor, is upgrading across Kafka 5.0, or is planning a rebalance-protocol migration.
+  - **Target Location**: `docs/rules/kafka/group-protocol-conversion-needs-an-empty-group.md`
 
 - **Path**: `rules/messaging/schema-evolution-safety.md`
   - **Why**: Schema evolution—changing the structure of messages over time—is inevitable in production systems, but unsafe evolution can break consumers, cause data loss, or require costly downtime. Safe schema evolution requires backward and forward compatibility strategies, versioning approaches, and contract testing.
@@ -86,6 +128,11 @@ summary: "Routing hub and decision matrix for messaging assets."
   - **Why**: The GoF catalogue, the architectural and code anti-patterns, and the per-stack considerations for .NET, Go, Laravel, and Python. It is a reference to consult when choosing patterns, not a constraint to obey.
   - **When**: Target project is choosing between patterns, or a review proposes one and the question is whether it fits the situation.
   - **Target Location**: `docs/architecture/backend-design-patterns.md`
+
+- **Path**: `shared/messaging/offset-commit-strategy-decision-matrix.md`
+  - **Why**: The consumer offset settings are one decision, not three knobs. A matrix of requirement × `auto.offset.reset` × `enable.auto.commit` × batch handling, showing which rows are reachable by configuration and which require storing the offset beside the output.
+  - **When**: Target project configures a Kafka consumer group, reviews offset-commit strategy, or claims exactly-once delivery to a sink that is not another Kafka topic.
+  - **Target Location**: `docs/messaging/offset-commit-strategy-decision-matrix.md`
 
 <!-- ASSET_MANIFEST_END -->
 
