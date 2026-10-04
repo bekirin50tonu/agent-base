@@ -2,7 +2,7 @@
 language: "Model Context Protocol"
 tag: "mcp"
 ecosystem: "backend"
-last_updated: "2026-09-30"
+last_updated: "2026-10-04"
 summary: "Routing hub and decision matrix for Model Context Protocol assets."
 ---
 
@@ -49,6 +49,60 @@ summary: "Routing hub and decision matrix for Model Context Protocol assets."
   - **When**: Target project implements an MCP server whose tools request user input, or a
     client handling `input_required` results.
   - **Target Location**: `docs/rules/mcp/no-server-initiated-requests.md`
+
+- **Path**: `rules/mcp/server-info-is-self-reported-and-not-verified.md`
+  - **Why**: `server/discover` — the one request every server must implement — returns the
+    server's identity and capabilities, and the spec says in its own words that none of it is
+    verified: intended for display, logging, and debugging, and clients "SHOULD NOT rely on it
+    for security decisions." The same response invites caching via `ttlMs` and `cacheScope`.
+    Together those make the trap: a client that caches for an hour and then gates behaviour on
+    `capabilities` is caching an unverified claim and acting on it. The sharpest form is the
+    negative claim — a server that omits a capability is never asked, so the client degrades
+    silently for the whole TTL and emits no error at all.
+  - **When**: Target project implements an MCP client calling `server/discover`, or keys
+    per-server config, allowlists, rate limits, or tool-result attribution on `serverInfo.name`.
+  - **Target Location**: `docs/rules/mcp/server-info-is-self-reported-and-not-verified.md`
+
+- **Path**: `rules/mcp/unsupported-version-is-per-request-not-a-handshake.md`
+  - **Why**: Because the negotiation handshake was removed, an unsupported version is a
+    *per-request* rejection (`UnsupportedProtocolVersionError`, code `-32022`, carrying both
+    `supported` and `requested`), not a failed session. Three distinct bugs follow: treating the
+    rejection as fatal poisons requests that would have succeeded; detecting era by HTTP status
+    or "any error" rather than by recognising modern error codes drops a modern server to
+    `initialize`; and caching era without honouring the spec's re-probe condition survives a
+    server upgrade. The matrix also names the asymmetry that cannot be fixed from the legacy
+    side: legacy clients have no fall-forward mechanism, so a modern-only server must name its
+    versions in *any* error returned to an `initialize` request.
+  - **When**: Target project implements an MCP client or server doing version negotiation, era
+    detection, or stdio/Streamable-HTTP fallback.
+  - **Target Location**: `docs/rules/mcp/unsupported-version-is-per-request-not-a-handshake.md`
+
+- **Path**: `rules/mcp/url-mode-elicitation-is-a-phishing-vector.md`
+  - **Why**: URL mode exists so credentials never transit the client or the LLM context, and the
+    spec devotes a section to the attack the feature creates: a malicious user tricks a victim
+    into completing *his* authorization URL, and the server binds the resulting tokens to the
+    wrong session — an account takeover in which every step of the OAuth flow succeeds and the
+    server's own logs show a clean callback. The mandated mitigation is identity equality, not a
+    warning: the server MUST verify that the user who started the elicitation is the user who
+    completed it, and the mechanism MUST be resilient to an attacker who can modify the URL.
+    `state` alone does not satisfy this — it prevents CSRF, not user substitution.
+  - **When**: Target project implements an MCP server using url-mode elicitation for OAuth or
+    third-party authorization, or a client rendering a url-mode elicitation.
+  - **Target Location**: `docs/rules/mcp/url-mode-elicitation-is-a-phishing-vector.md`
+
+- **Path**: `rules/mcp/sampling-max-tokens-is-the-only-hard-budget.md`
+  - **Why**: Sampling defines four tuning parameters and draws a hard line between them:
+    "The client MUST respect the maxTokens parameter. The client MAY modify or ignore
+    temperature, stopSequences and metadata." `maxTokens` is the only MUST and the only one that
+    bounds spend, so a client honouring temperature while ignoring maxTokens is the shape the
+    spec describes. Without it, `stopReason: "maxTokens"` is the only evidence the limit ever
+    bound anything. The tool-result structure adds two MUSTs that are validation rules, not
+    preferences: a tool-result message must contain *only* tool results, and every
+    `ToolUseContent` must be matched before any other message — which is why a mixed array
+    passes local checks and fails at the model provider with an opaque 400.
+  - **When**: Target project implements sampling on either side, or a tool-use loop inside a
+    sampling conversation.
+  - **Target Location**: `docs/rules/mcp/sampling-max-tokens-is-the-only-hard-budget.md`
 
 ## 2. Skills (`skills/`)
 
