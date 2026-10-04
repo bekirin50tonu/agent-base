@@ -1,0 +1,6 @@
+{
+  "name": "docker-helper",
+  "description": "Helps with Docker and Docker Compose-related tasks, such as waiting for a service to be ready rather than merely started, understanding why an unresolved environment variable removes the variable instead of inheriting it, bounding a restart loop instead of leaving deploy.restart_policy at any, reviewing a Compose file's resolved output instead of its YAML, running as a real non-root uid:gid pair, and keeping secrets out of environment variables and image layers.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
