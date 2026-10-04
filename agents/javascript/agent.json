@@ -1,0 +1,6 @@
+{
+  "name": "javascript-helper",
+  "description": "Helps with JavaScript tasks where the language is behaving exactly as specified and the author's model of it is wrong — reading a hoisted var as assigned because typeof x did not throw, leaving a numeric sort to its default string comparator, treating a shallow Object.freeze() as an immutability guarantee, reaching for Object.is as 'the strictest' when it is off the equality spectrum and SameValueZero has no API, defaulting a count or empty string with || instead of ??, storing a 64-bit ID in a double that silently rounds above 2^53, using parseInt() as a validator that returns the longest valid prefix, calling hasOwnProperty on a null-prototype Object.groupBy() result, and assuming a Promise.all() rejection cancelled the operations still in flight.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
