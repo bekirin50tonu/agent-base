@@ -1,0 +1,6 @@
+{
+  "name": "rails-helper",
+  "description": "Helps with Ruby on Rails tasks, such as deciding whether a side effect belongs in after_save, after_commit or after_all_transactions_commit, and recording an irreversible effect so a rollback cannot lose it, noticing when a persistence call returns false or an object instead of raising, giving a job an explicit retry policy because failed jobs are not retried by default, backfilling existing rows after adding a column with a default rather than trusting the default to reach them, splitting a migration into schema, data and constraint so a partial application is impossible, enabling perform_caching in development so a fragment-cache bug reproduces locally, and filtering unpermitted params explicitly instead of expecting a request with a dropped key to be rejected.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
