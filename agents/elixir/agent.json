@@ -1,0 +1,6 @@
+{
+  "name": "elixir-helper",
+  "description": "Helps with Elixir-related tasks, such as OTP supervision tree design, restart strategies, process lifecycle and failure containment, and applying Elixir best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
