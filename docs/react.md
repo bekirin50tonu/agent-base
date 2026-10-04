@@ -98,8 +98,15 @@ summary: "Routing hub and decision matrix for React / Next.js / pnpm assets."
 ## 3. Agents (`agents/`)
 
 - **Path**: `agents/typescript/agent.json`
-  - **Why**: Helps with TypeScript-related tasks, such as adopting strict checking and other TypeScript best practices.
-  - **When**: Target project has a `tsconfig.json`.
+  - **Why**: TypeScript tasks where a type check did not run, ran on a different axis than
+    expected, or reported nothing that was being read for — `any` where `unknown` would keep the
+    call chain checked, array indexing with `noUncheckedIndexedAccess` off, `strictNullChecks` off,
+    narrowing read as a constraint on assignment, `in` checks that do not exclude, a `module` setting
+    that leaves Node.js compatibility unchecked, the `__esModule` double default, derived compiler
+    option defaults, and `!`/`as` performing no runtime check.
+  - **When**: Target project has a `tsconfig.json` and any of `any`, index access, nullability,
+    narrowing, or `module`/`moduleResolution` configuration. These are language-level concerns;
+    a non-React TypeScript project reaches the same agent from `docs/typescript.md`.
   - **Target Location**: `docs/agents/typescript/agent.json`
 
 ## 4. Shared Assets (`shared/`)

@@ -1,6 +1,6 @@
 {
   "name": "typescript-helper",
-  "description": "Helps with TypeScript-related tasks, such as adopting strict checking and other TypeScript best practices.",
+  "description": "Helps with TypeScript tasks where a type check did not run, ran on a different axis than expected, or reported nothing that was being read for — reaching for `any` where `unknown` is inert outbound and would keep the call chain checked, indexing into an array with `noUncheckedIndexedAccess` off so `arr[0]` is typed present whether or not it is, turning `strictNullChecks` off so every nullability annotation becomes decorative, reading control-flow narrowing as a constraint on assignment when assignability is checked against the declared type, treating an `in` check as an exclusive partition when optional properties survive in both branches, running under `module: esnext` so the compiler never checks the output for Node.js compatibility, hitting Node's \"double default\" where the same import works transpiled and is not a function natively, trusting a compiler option whose default is derived from a flag the config never mentions, and using `!` or `as` where no runtime check is performed at all.",
   "model": "sonnet",
   "tools": ["*"]
 }
