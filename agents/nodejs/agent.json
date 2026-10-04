@@ -1,0 +1,6 @@
+{
+  "name": "nodejs-helper",
+  "description": "Helps with Node.js-related tasks, such as applying backpressure when write() returns false, exiting without discarding queued stdout writes, bounding process.nextTick() retry loops, keeping an API either fully sync or fully async, declaring the module format instead of letting it be inferred, and knowing when Buffer.allocUnsafe() memory may still hold prior data.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
