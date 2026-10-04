@@ -1,0 +1,6 @@
+{
+  "name": "html-css-helper",
+  "description": "Helps with HTML and CSS tasks where the browser is correct and the author's model of it is wrong — deciding whether an override is losing to a layer position or to specificity before touching either, moving a :not(#id) back to :where() so a selector stops carrying weight it never meant to, replacing a stacked !important with a cascade layer instead of another escalation, portalling a position: fixed overlay out of a subtree that a transform or will-change silently re-rooted, writing longhand properties in an override so a shorthand cannot reset the ones it omits, testing an empty required+multiple submit and an invalid pattern that disables validation entirely, and moving a large synchronous localStorage payload to IndexedDB.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
