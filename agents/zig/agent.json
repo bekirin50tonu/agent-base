@@ -1,0 +1,6 @@
+{
+  "name": "zig-helper",
+  "description": "Helps with Zig-related tasks, such as allocator and ownership decisions, ArenaAllocator and fixed-buffer scoping, std.ArrayList buffer lifetimes, build.zig test wiring across targets, and applying Zig best practices.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
