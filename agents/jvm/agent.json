@@ -1,0 +1,6 @@
+{
+  "name": "jvm-helper",
+  "description": "Helps with plain-JVM tasks where the platform's documented behaviour is correct and the author's model of it is wrong — deciding whether a synchronized block will pin a virtual thread and cap concurrency at the number of locks, moving request context from ThreadLocal to ScopedValue instead of caching per-thread objects a virtual thread never reuses, choosing a structured-concurrency joiner policy that fails the scope when one child fails, stripping GC flags for collectors that were removed instead of trusting a zero exit code, warming up before benchmarking instead of measuring interpreted first calls, and recompiling a sealed hierarchy's switch consumers rather than shipping an artifact whose exhaustiveness proof has expired.",
+  "model": "sonnet",
+  "tools": ["*"]
+}
